@@ -52,7 +52,7 @@ class CJuiDatePicker extends CJuiInputWidget
 	/**
 	 * @var string The i18n Jquery UI script file. It uses scriptUrl property as base url.
 	 */
-	public $i18nScriptFile='jquery-ui-i18n.min.js';
+	public $i18nScriptFile='jquery-ui-i18n.js';
 	/**
 	 * @var array The default options called just one time per request. This options will alter every other CJuiDatePicker instance in the page.
 	 * It has to be set at the first call of CJuiDatePicker widget in the request.

@@ -72,7 +72,7 @@ class CWebLogRoute extends CLogRoute
 			if(($userAgent=$app->getRequest()->getUserAgent())!==null && preg_match('/msie [5-9]/i',$userAgent))
 			{
 				echo '<script type="text/javascript">';
-				echo file_get_contents(dirname(__FILE__).'/../vendors/console-normalizer/normalizeconsole.min.js');
+				echo file_get_contents(dirname(__FILE__).'/../vendors/console-normalizer/normalizeconsole.js');
 				echo "</script>\n";
 			}
 		}

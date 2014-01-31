@@ -13,7 +13,7 @@
 
 return array(
 	'jquery'=>array(
-		'js'=>array(YII_DEBUG ? 'jquery.js' : 'jquery.min.js'),
+		'js'=>array('jquery.js'),
 	),
 	'yii'=>array(
 		'js'=>array('jquery.yii.js'),
@@ -21,6 +21,7 @@ return array(
 	),
 	'yiitab'=>array(
 		'js'=>array('jquery.yiitab.js'),
+		'css'=>array('jquery.yiitab.css'),
 		'depends'=>array('jquery'),
 	),
 	'yiiactiveform'=>array(
@@ -28,7 +29,8 @@ return array(
 		'depends'=>array('jquery'),
 	),
 	'jquery.ui'=>array(
-		'js'=>array('jui/js/jquery-ui.min.js'),
+		'js'=>array('jquery-ui.js'),
+		'css'=>array('jquery-ui.css', 'jquery-ui-i18n.css'),
 		'depends'=>array('jquery'),
 	),
 	'bgiframe'=>array(
@@ -41,10 +43,11 @@ return array(
 	),
 	'autocomplete'=>array(
 		'js'=>array('jquery.autocomplete.js'),
+		'css'=>array('jquery.autocomplete.css'),
 		'depends'=>array('jquery', 'bgiframe', 'ajaxqueue'),
 	),
 	'maskedinput'=>array(
-		'js'=>array(YII_DEBUG ? 'jquery.maskedinput.js' : 'jquery.maskedinput.min.js'),
+		'js'=>array('jquery.maskedinput.js'),
 		'depends'=>array('jquery'),
 	),
 	'cookie'=>array(
@@ -53,6 +56,7 @@ return array(
 	),
 	'treeview'=>array(
 		'js'=>array('jquery.treeview.js', 'jquery.treeview.edit.js', 'jquery.treeview.async.js'),
+		'css'=>array('jquery.treeview.css'),
 		'depends'=>array('jquery', 'cookie'),
 	),
 	'multifile'=>array(
@@ -61,6 +65,7 @@ return array(
 	),
 	'rating'=>array(
 		'js'=>array('jquery.rating.js'),
+		'css'=>array('jquery.rating.css'),
 		'depends'=>array('jquery', 'metadata'),
 	),
 	'metadata'=>array(
@@ -68,7 +73,7 @@ return array(
 		'depends'=>array('jquery'),
 	),
 	'bbq'=>array(
-		'js'=>array(YII_DEBUG ? 'jquery.ba-bbq.js' : 'jquery.ba-bbq.min.js'),
+		'js'=>array('jquery.ba-bbq.js'),
 		'depends'=>array('jquery'),
 	),
 	'history'=>array(
@@ -76,6 +81,6 @@ return array(
 		'depends'=>array('jquery'),
 	),
 	'punycode'=>array(
-		'js'=>array(YII_DEBUG ? 'punycode.js' : 'punycode.min.js'),
+		'js'=>array('punycode.js'),
 	),
 );

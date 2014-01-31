@@ -7,7 +7,7 @@ Usage
 -----
 
 ```html
-    <script src="normalizeconsole.min.js"></script>
+    <script src="normalizeconsole.js"></script>
     <script>
         console.group('Play around');
         console.time('timer');
