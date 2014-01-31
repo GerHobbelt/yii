@@ -23,7 +23,7 @@ foreach($data as $index=>$log)
 	$color=($index%2)?'#F5F5F5':'#FFFFFF';
 	if(isset($colors[$log[1]]))
 		$color=$colors[$log[1]];
-	$message='<pre>'.CHtml::encode(wordwrap($log[0])).'</pre>';
+	$message='<pre>'.CHtml::encode($log[0]).'</pre>';
 	$time=date('H:i:s.',$log[3]).sprintf('%06d',(int)(($log[3]-(int)$log[3])*1000000));
 
 	echo <<<EOD
