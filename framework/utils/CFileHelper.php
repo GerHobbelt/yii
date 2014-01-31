@@ -143,6 +143,8 @@ class CFileHelper
 			self::createDirectory($dst,isset($options['newDirMode'])?$options['newDirMode']:null,false);
 
 		$folder=opendir($src);
+		if($folder===false)
+			throw new Exception('Unable to open directory: ' . $src);
 		while(($file=readdir($folder))!==false)
 		{
 			if($file==='.' || $file==='..')
@@ -185,6 +187,8 @@ class CFileHelper
 	{
 		$list=array();
 		$handle=opendir($dir.$base);
+		if($handle===false)
+			throw new Exception('Unable to open directory: ' . $dir);
 		while(($file=readdir($handle))!==false)
 		{
 			if($file==='.' || $file==='..')

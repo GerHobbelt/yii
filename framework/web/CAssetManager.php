@@ -218,7 +218,7 @@ class CAssetManager extends CApplicationComponent
 		{
 			return $this->_published[$path];
 		}
-		elseif(($src=realpath($path))!==false)
+		elseif(is_string($path) && ($src=realpath($path))!==false)
 		{
 			$dir=$this->generatePath($src,$hashByName);
 			$dstDir=$this->getBasePath().DIRECTORY_SEPARATOR.$dir;
@@ -280,7 +280,7 @@ class CAssetManager extends CApplicationComponent
 	 */
 	public function getPublishedPath($path,$hashByName=false)
 	{
-		if(($path=realpath($path))!==false)
+		if(is_string($path) && ($path=realpath($path))!==false)
 		{
 			$base=$this->getBasePath().DIRECTORY_SEPARATOR.$this->generatePath($path,$hashByName);
 			return is_file($path) ? $base.DIRECTORY_SEPARATOR.basename($path) : $base ;
@@ -304,7 +304,7 @@ class CAssetManager extends CApplicationComponent
 	{
 		if(isset($this->_published[$path]))
 			return $this->_published[$path];
-		if(($path=realpath($path))!==false)
+		if(is_string($path) && ($path=realpath($path))!==false)
 		{
 			$base=$this->getBaseUrl().'/'.$this->generatePath($path,$hashByName);
 			return is_file($path) ? $base.'/'.basename($path) : $base;

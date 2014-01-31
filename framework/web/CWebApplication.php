@@ -374,7 +374,7 @@ class CWebApplication extends CApplication
 
 			if($owner->controllerNamespace!==null)
 			{
-				$className=$owner->controllerNamespace.'\\'.$className;
+				$className=$owner->controllerNamespace.'\\'.str_replace('/','\\',$controllerID).$className;
 			}
 
 			if(YII_DEBUG_ROUTING) Yii::trace("createController [5::test class/file] { " . var_dump_ex_txt(array('file'=>$classFile, 'name'=>$className, 'controllerID'=>$controllerID, 'id'=>$id)) . " }", "framework.web.CWebApplication");
