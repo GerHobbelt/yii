@@ -162,7 +162,9 @@ class COutputCache extends CFilterWidget
 	public function filter($filterChain)
 	{
 		if(!$this->getIsContentCached())
+		{
 			$filterChain->run();
+		}
 		$this->run();
 	}
 
@@ -175,7 +177,9 @@ class COutputCache extends CFilterWidget
 	public function init()
 	{
 		if($this->getIsContentCached())
+		{
 			$this->replayActions();
+		}
 		elseif($this->_cache!==null)
 		{
 			$this->getController()->getCachingStack()->push($this);
@@ -195,9 +199,13 @@ class COutputCache extends CFilterWidget
 		if($this->getIsContentCached())
 		{
 			if($this->getController()->isCachingStackEmpty())
+			{
 				echo $this->getController()->processDynamicOutput($this->_content);
+			}
 			else
+			{
 				echo $this->_content;
+			}
 		}
 		elseif($this->_cache!==null)
 		{
@@ -205,13 +213,19 @@ class COutputCache extends CFilterWidget
 			$this->getController()->getCachingStack()->pop();
 			$data=array($this->_content,$this->_actions);
 			if(is_array($this->dependency))
+			{
 				$this->dependency=Yii::createComponent($this->dependency);
+			}
 			$this->_cache->set($this->getCacheKey(),$data,$this->duration,$this->dependency);
 
 			if($this->getController()->isCachingStackEmpty())
+			{
 				echo $this->getController()->processDynamicOutput($this->_content);
+			}
 			else
+			{
 				echo $this->_content;
+			}
 		}
 	}
 
@@ -221,9 +235,13 @@ class COutputCache extends CFilterWidget
 	public function getIsContentCached()
 	{
 		if($this->_contentCached!==null)
+		{
 			return $this->_contentCached;
+		}
 		else
+		{
 			return $this->_contentCached=$this->checkContentCache();
+		}
 	}
 
 	/**
@@ -242,9 +260,13 @@ class COutputCache extends CFilterWidget
 				return true;
 			}
 			if($this->duration==0)
+			{
 				$this->_cache->delete($this->getCacheKey());
+			}
 			if($this->duration<=0)
+			{
 				$this->_cache=null;
+			}
 		}
 		return false;
 	}
@@ -277,7 +299,9 @@ class COutputCache extends CFilterWidget
 	protected function getCacheKey()
 	{
 		if($this->_key!==null)
+		{
 			return $this->_key;
+		}
 		else
 		{
 			$key=$this->getBaseCacheKey().'.';
@@ -286,12 +310,16 @@ class COutputCache extends CFilterWidget
 				$controller=$this->getController();
 				$key.=$controller->getUniqueId().'/';
 				if(($action=$controller->getAction())!==null)
+				{
 					$key.=$action->getId();
+				}
 			}
 			$key.='.';
 
 			if($this->varyBySession)
+			{
 				$key.=Yii::app()->getSession()->getSessionID();
+			}
 			$key.='.';
 
 			if(is_array($this->varyByParam) && isset($this->varyByParam[0]))
@@ -300,20 +328,28 @@ class COutputCache extends CFilterWidget
 				foreach($this->varyByParam as $name)
 				{
 					if(isset($_GET[$name]))
+					{
 						$params[$name]=$_GET[$name];
+					}
 					else
+					{
 						$params[$name]='';
+					}
 				}
 				$key.=serialize($params);
 			}
 			$key.='.';
 
 			if($this->varyByExpression!==null)
+			{
 				$key.=$this->evaluateExpression($this->varyByExpression);
+			}
 			$key.='.';
 
 			if($this->varyByLanguage)
+			{
 				$key.=Yii::app()->language;
+			}
 			$key.='.';
 
 			return $this->_key=$key;
@@ -331,6 +367,7 @@ class COutputCache extends CFilterWidget
 	 */
 	public function recordAction($context,$method,$params)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("recordAction(context = '$context', method = '$method', params = " . var_dump_ex_txt($params) . " )",'system.base.COutputCache');
 		$this->_actions[]=array($context,$method,$params);
 	}
 
@@ -346,19 +383,31 @@ class COutputCache extends CFilterWidget
 		foreach($this->_actions as $action)
 		{
 			if($action[0]==='clientScript')
+			{
 				$object=$cs;
+			}
 			elseif($action[0]==='')
+			{
 				$object=$controller;
+			}
 			else
+			{
 				$object=$controller->{$action[0]};
+			}
 			if(method_exists($object,$action[1]))
+			{
 				call_user_func_array(array($object,$action[1]),$action[2]);
+			}
 			elseif($action[0]==='' && function_exists($action[1]))
+			{
 				call_user_func_array($action[1],$action[2]);
+			}
 			else
+			{
 				throw new CException(Yii::t('yii','Unable to replay the action "{object}.{method}". The method does not exist.',
 					array('object'=>$action[0],
 						'method'=>$action[1])));
+			}
 		}
 	}
 }

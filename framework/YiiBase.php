@@ -19,6 +19,27 @@ defined('YII_BEGIN_TIME') or define('YII_BEGIN_TIME',microtime(true));
  */
 defined('YII_DEBUG') or define('YII_DEBUG',false);
 /**
+ * This constant defines whether the application should show YII framework sourcefiles in stack traces or not. Defaults to the current setting of YII_DEBUG, i.e. this option is enabled by default when debugging.
+ *
+ * Note that the 'framework internal files' in any stack trace do not count against the YII_TRACE_LEVEL limit, unless the limit is set to zero(0) which means that no stack trace will be shown at all.
+ */
+defined('YII_DEBUG_INTERNALS') or define('YII_DEBUG_INTERNALS', YII_DEBUG);
+/**
+ * This constant defines whether the application should log autoload activity or not. Defaults to false.
+ *
+ * Note that the autoload logging will damage your page output as it will print immediately rather than go through the Yii:log facility (which would have to autoload itself).
+ * Hence use this only when your classes do not load and you need to see who does and decides what exactly during the autoload process.
+ */
+defined('YII_DEBUG_AUTOLOAD') or define('YII_DEBUG_AUTOLOAD', false);
+/**
+ * This constant defines whether the application should show routing-related diagnostic traces or not. Defaults to the current setting of YII_DEBUG, i.e. this option is enabled by default when debugging.
+ */
+defined('YII_DEBUG_ROUTING') or define('YII_DEBUG_ROUTING', YII_DEBUG);
+/**
+ * This constant defines whether the application should show JS/CSS registration related diagnostic traces or not. Defaults to the current setting of YII_DEBUG, i.e. this option is enabled by default when debugging.
+ */
+defined('YII_DEBUG_JS_CSS_PACKAGES') or define('YII_DEBUG_JS_CSS_PACKAGES', YII_DEBUG);
+/**
  * This constant defines how much call stack information (file name and line number) should be logged by Yii::trace().
  * Defaults to 0, meaning no backtrace information. If it is greater than 0,
  * at most that number of call stacks will be logged. Note, only user application call stacks are considered.
@@ -359,18 +380,31 @@ class YiiBase
 	public static function getPathOfAlias($alias)
 	{
 		if(isset(self::$_aliases[$alias]))
-			return self::$_aliases[$alias];
+		{
+			$rv = self::$_aliases[$alias];
+			if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("getPathOfAlias(alias = '$alias') --> alias is set: " . var_dump_ex_txt($rv) . "",'system.base.YiiBase');
+			return $rv;
+		}
 		elseif(($pos=strpos($alias,'.'))!==false)
 		{
 			$rootAlias=substr($alias,0,$pos);
 			if(isset(self::$_aliases[$rootAlias]))
-				return self::$_aliases[$alias]=rtrim(self::$_aliases[$rootAlias].DIRECTORY_SEPARATOR.str_replace('.',DIRECTORY_SEPARATOR,substr($alias,$pos+1)),'*'.DIRECTORY_SEPARATOR);
+			{
+				$rv = self::$_aliases[$alias]=rtrim(self::$_aliases[$rootAlias].DIRECTORY_SEPARATOR.str_replace('.',DIRECTORY_SEPARATOR,substr($alias,$pos+1)),'*'.DIRECTORY_SEPARATOR);
+				if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("getPathOfAlias(alias = '$alias') --> constructed via rootAlias='$rootAlias': " . var_dump_ex_txt($rv) . "",'system.base.YiiBase');
+				return $rv;
+			}
 			elseif(self::$_app instanceof CWebApplication)
 			{
 				if(self::$_app->findModule($rootAlias)!==null)
-					return self::getPathOfAlias($alias);
+				{
+					$rv = self::getPathOfAlias($alias);
+					if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("getPathOfAlias(alias = '$alias') --> constructed via module rootAlias='$rootAlias': " . var_dump_ex_txt($rv) . "",'system.base.YiiBase');
+					return $rv;
+				}
 			}
 		}
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("getPathOfAlias(alias = '$alias') --> FALSE { aliases list = " . var_dump_ex_txt(self::$_aliases) . "",'system.base.YiiBase');
 		return false;
 	}
 
@@ -383,10 +417,15 @@ class YiiBase
 	 */
 	public static function setPathOfAlias($alias,$path)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("setPathOfAlias(alias = '$alias', path = '$path')",'system.base.YiiBase');
 		if(empty($path))
+		{
 			unset(self::$_aliases[$alias]);
+		}
 		else
+		{
 			self::$_aliases[$alias]=rtrim($path,'\\/');
+		}
 	}
 
 	/**
@@ -399,13 +438,23 @@ class YiiBase
 	 */
 	public static function autoload($className,$classMapOnly=false)
 	{
+		if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: Autoloading \"$className\" class (map only: $classMapOnly)\n</pre>";
 		// use include so that the error PHP file may appear
 		if(isset(self::$classMap[$className]))
+		{
+			if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: OK Autoload \"$className\" class via classmap: " . self::$classMap[$className] . "\n</pre>";
 			include(self::$classMap[$className]);
+		}
 		elseif(isset(self::$_coreClasses[$className]))
+		{
+			if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: OK Autoload \"$className\" class via coreclasses: " . YII_PATH.self::$_coreClasses[$className] . "\n</pre>";
 			include(YII_PATH.self::$_coreClasses[$className]);
+		}
 		elseif($classMapOnly)
+		{
+			if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: NO Autoload \"$className\" class due to classMapOnly\n</pre>";
 			return false;
+		}
 		else
 		{
 			// include class file relying on include_path
@@ -413,13 +462,16 @@ class YiiBase
 			{
 				if(self::$enableIncludePath===false)
 				{
+					if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: Autoloading \"$className\" via include paths: " . var_dump_ex(self::$_includePaths) . "\n</pre>";
 					foreach(self::$_includePaths as $path)
 					{
 						$classFile=$path.DIRECTORY_SEPARATOR.$className.'.php';
+						if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: Autoloading \"$className\" test path: " . $classFile . "\n</pre>";
 						if(is_file($classFile))
 						{
+							if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: OK Autoload \"$className\" via path: " . $classFile . "\n</pre>";
 							include($classFile);
-							if(YII_DEBUG && basename(realpath($classFile))!==$className.'.php')
+							if(YII_DEBUG_AUTOLOAD && basename(realpath($classFile))!==$className.'.php')
 								throw new CException(Yii::t('yii','Class name "{class}" does not match class file "{file}".', array(
 									'{class}'=>$className,
 									'{file}'=>$classFile,
@@ -429,18 +481,29 @@ class YiiBase
 					}
 				}
 				else
+				{
+					if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: Autoloading \"$className\" via fixed path: " . $className.'.php' . "\n</pre>";
 					include($className.'.php');
+				}
 			}
 			else  // class name with namespace in PHP 5.3
 			{
 				$namespace=str_replace('\\','.',ltrim($className,'\\'));
 				if(($path=self::getPathOfAlias($namespace))!==false)
+				{
+					if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: OK Autoload \"$className\" via namespace: " . $namespace . " --> " . $path.'.php' . "\n</pre>";
 					include($path.'.php');
+				}
 				else
+				{
+					if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: FAIL Autoload \"$className\" via namespace: " . $namespace . "\n</pre>";
 					return false;
+				}
 			}
+			if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: Check class exists: \"$className\"\n</pre>";
 			return class_exists($className,false) || interface_exists($className,false);
 		}
+		if(YII_DEBUG_AUTOLOAD) echo "<pre>Yii: autoload assumes OK load for: \"$className\"\n</pre>";
 		return true;
 	}
 
@@ -454,7 +517,9 @@ class YiiBase
 	public static function trace($msg,$category='application')
 	{
 		if(YII_DEBUG)
+		{
 			self::log($msg,CLogger::LEVEL_TRACE,$category);
+		}
 	}
 
 	/**
@@ -476,10 +541,10 @@ class YiiBase
 			$count=0;
 			foreach($traces as $trace)
 			{
-				if(isset($trace['file'],$trace['line']) && strpos($trace['file'],YII_PATH)!==0)
+				if(isset($trace['file'],$trace['line']) && (YII_DEBUG_INTERNALS || strpos($trace['file'],YII_PATH)!==0))
 				{
 					$msg.="\nin ".$trace['file'].' ('.$trace['line'].')';
-					if(++$count>=YII_TRACE_LEVEL)
+					if(strpos($trace['file'],YII_PATH)!==0 && ++$count>=YII_TRACE_LEVEL)
 						break;
 				}
 			}

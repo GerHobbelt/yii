@@ -105,7 +105,9 @@ class CHttpCacheFilter extends CFilter
 		}
 
 		if($lastModified)
+		{
 			header('Last-Modified: '.gmdate('D, d M Y H:i:s', $lastModified).' GMT');
+		}
 
 		$this->sendCacheControlHeader();
 		return true;

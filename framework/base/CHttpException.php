@@ -34,6 +34,7 @@ class CHttpException extends CException
 	 */
 	public function __construct($status,$message=null,$code=0,$previous=null)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("new CHttpException(status = " . var_dump_ex_txt($status) . ", message = " . var_dump_ex_txt($message) . ", code = " . var_dump_ex_txt($code) . " )", "framework.base.CHttpException");
 		$this->statusCode=$status;
 		parent::__construct($message,$code,$previous);
 	}

@@ -344,15 +344,21 @@ class CGridView extends CBaseListView
 			throw new CException(Yii::t('zii','The property filterSelector should be defined.'));
 
 		if(!isset($this->htmlOptions['class']))
+		{
 			$this->htmlOptions['class']='grid-view';
+		}
 
 		if($this->baseScriptUrl===null)
+		{
 			$this->baseScriptUrl=Yii::app()->getAssetManager()->publish(Yii::getPathOfAlias('zii.widgets.assets')).'/gridview';
+		}
 
 		if($this->cssFile!==false)
 		{
 			if($this->cssFile===null)
+			{
 				$this->cssFile=$this->baseScriptUrl.'/styles.css';
+			}
 			Yii::app()->getClientScript()->registerCssFile($this->cssFile);
 		}
 
@@ -367,24 +373,32 @@ class CGridView extends CBaseListView
 		if($this->columns===array())
 		{
 			if($this->dataProvider instanceof CActiveDataProvider)
+			{
 				$this->columns=$this->dataProvider->model->attributeNames();
+			}
 			elseif($this->dataProvider instanceof IDataProvider)
 			{
 				// use the keys of the first row of data as the default columns
 				$data=$this->dataProvider->getData();
 				if(isset($data[0]) && is_array($data[0]))
+				{
 					$this->columns=array_keys($data[0]);
+				}
 			}
 		}
 		$id=$this->getId();
 		foreach($this->columns as $i=>$column)
 		{
 			if(is_string($column))
+			{
 				$column=$this->createDataColumn($column);
+			}
 			else
 			{
 				if(!isset($column['class']))
+				{
 					$column['class']='CDataColumn';
+				}
 				$column=Yii::createComponent($column, $this);
 			}
 			if(!$column->visible)
@@ -393,12 +407,16 @@ class CGridView extends CBaseListView
 				continue;
 			}
 			if($column->id===null)
+			{
 				$column->id=$id.'_c'.$i;
+			}
 			$this->columns[$i]=$column;
 		}
 
 		foreach($this->columns as $column)
+		{
 			$column->init();
+		}
 	}
 
 	/**
@@ -413,9 +431,13 @@ class CGridView extends CBaseListView
 		$column=new CDataColumn($this);
 		$column->name=$matches[1];
 		if(isset($matches[3]) && $matches[3]!=='')
+		{
 			$column->type=$matches[3];
+		}
 		if(isset($matches[5]))
+		{
 			$column->header=$matches[5];
+		}
 		return $column;
 	}
 

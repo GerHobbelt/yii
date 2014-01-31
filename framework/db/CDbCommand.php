@@ -157,7 +157,9 @@ class CDbCommand extends CComponent
 	public function getText()
 	{
 		if($this->_text=='' && !empty($this->_query))
+		{
 			$this->setText($this->buildQuery($this->_query));
+		}
 		return $this->_text;
 	}
 

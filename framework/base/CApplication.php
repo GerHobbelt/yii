@@ -174,12 +174,17 @@ abstract class CApplication extends CModule
 	 */
 	public function run()
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("run { app = " . var_dump_ex_txt($this) . " }", "framework.base.CApplication");
 		if($this->hasEventHandler('onBeginRequest'))
+		{
 			$this->onBeginRequest(new CEvent($this));
+		}
 		register_shutdown_function(array($this,'end'),0,false);
 		$this->processRequest();
 		if($this->hasEventHandler('onEndRequest'))
+		{
 			$this->onEndRequest(new CEvent($this));
+		}
 	}
 
 	/**
@@ -192,10 +197,15 @@ abstract class CApplication extends CModule
 	 */
 	public function end($status=0,$exit=true)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("end(status = " . var_dump_ex_txt($status) . ", exit = " . var_dump_ex_txt($exit) . " )", "framework.web.CApplication");
 		if($this->hasEventHandler('onEndRequest'))
+		{
 			$this->onEndRequest(new CEvent($this));
+		}
 		if($exit)
+		{
 			exit($status);
+		}
 	}
 
 	/**
@@ -259,8 +269,10 @@ abstract class CApplication extends CModule
 	public function setBasePath($path)
 	{
 		if(($this->_basePath=realpath($path))===false || !is_dir($this->_basePath))
+		{
 			throw new CException(Yii::t('yii','Application base path "{path}" is not a valid directory.',
 				array('{path}'=>$path)));
+		}
 	}
 
 	/**
@@ -270,7 +282,9 @@ abstract class CApplication extends CModule
 	public function getRuntimePath()
 	{
 		if($this->_runtimePath!==null)
+		{
 			return $this->_runtimePath;
+		}
 		else
 		{
 			$this->setRuntimePath($this->getBasePath().DIRECTORY_SEPARATOR.'runtime');
@@ -286,8 +300,10 @@ abstract class CApplication extends CModule
 	public function setRuntimePath($path)
 	{
 		if(($runtimePath=realpath($path))===false || !is_dir($runtimePath) || !is_writable($runtimePath))
+		{
 			throw new CException(Yii::t('yii','Application runtime path "{path}" is not valid. Please make sure it is a directory writable by the Web server process.',
 				array('{path}'=>$path)));
+		}
 		$this->_runtimePath=$runtimePath;
 	}
 
@@ -308,8 +324,10 @@ abstract class CApplication extends CModule
 	public function setExtensionPath($path)
 	{
 		if(($extensionPath=realpath($path))===false || !is_dir($extensionPath))
+		{
 			throw new CException(Yii::t('yii','Extension path "{path}" does not exist.',
 				array('{path}'=>$path)));
+		}
 		Yii::setPathOfAlias('ext',$extensionPath);
 	}
 
@@ -628,7 +646,9 @@ abstract class CApplication extends CModule
 	public function setGlobalState($key,$value,$defaultValue=null)
 	{
 		if($this->_globalState===null)
+		{
 			$this->loadGlobalState();
+		}
 
 		$changed=$this->_stateChanged;
 		if($value===$defaultValue)
@@ -646,7 +666,9 @@ abstract class CApplication extends CModule
 		}
 
 		if($this->_stateChanged!==$changed)
+		{
 			$this->attachEventHandler('onEndRequest',array($this,'saveGlobalState'));
+		}
 	}
 
 	/**
@@ -729,9 +751,13 @@ abstract class CApplication extends CModule
 			{
 				// try an error handler
 				if(($handler=$this->getErrorHandler())!==null)
+				{
 					$handler->handle($event);
+				}
 				else
+				{
 					$this->displayException($exception);
+				}
 			}
 		}
 		catch(Exception $e)

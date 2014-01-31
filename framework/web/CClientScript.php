@@ -202,13 +202,16 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function render(&$output)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("render { this = " . var_dump_ex_txt($this) . " }",'system.base.CClientScript');
 		if(!$this->hasScripts)
 			return;
 
 		$this->renderCoreScripts();
 
 		if(!empty($this->scriptMap))
+		{
 			$this->remapScripts();
+		}
 
 		$this->unifyScripts();
 
@@ -226,20 +229,27 @@ class CClientScript extends CApplicationComponent
 	 */
 	protected function unifyScripts()
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("unifyScripts",'system.base.CClientScript');
 		if(!$this->enableJavaScript)
 			return;
 		$map=array();
 		if(isset($this->scriptFiles[self::POS_HEAD]))
+		{
 			$map=$this->scriptFiles[self::POS_HEAD];
+		}
 
 		if(isset($this->scriptFiles[self::POS_BEGIN]))
 		{
 			foreach($this->scriptFiles[self::POS_BEGIN] as $scriptFile=>$scriptFileValue)
 			{
 				if(isset($map[$scriptFile]))
+				{
 					unset($this->scriptFiles[self::POS_BEGIN][$scriptFile]);
+				}
 				else
+				{
 					$map[$scriptFile]=true;
+				}
 			}
 		}
 
@@ -248,7 +258,9 @@ class CClientScript extends CApplicationComponent
 			foreach($this->scriptFiles[self::POS_END] as $key=>$scriptFile)
 			{
 				if(isset($map[$key]))
+				{
 					unset($this->scriptFiles[self::POS_END][$key]);
+				}
 			}
 		}
 	}
@@ -258,6 +270,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	protected function remapScripts()
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("remapScripts",'system.base.CClientScript');
 		$cssFiles=array();
 		foreach($this->cssFiles as $url=>$media)
 		{
@@ -265,15 +278,21 @@ class CClientScript extends CApplicationComponent
 			if(isset($this->scriptMap[$name]))
 			{
 				if($this->scriptMap[$name]!==false)
+				{
 					$cssFiles[$this->scriptMap[$name]]=$media;
+				}
 			}
 			elseif(isset($this->scriptMap['*.css']))
 			{
 				if($this->scriptMap['*.css']!==false)
+				{
 					$cssFiles[$this->scriptMap['*.css']]=$media;
+				}
 			}
 			else
+			{
 				$cssFiles[$url]=$media;
+			}
 		}
 		$this->cssFiles=$cssFiles;
 
@@ -287,15 +306,21 @@ class CClientScript extends CApplicationComponent
 				if(isset($this->scriptMap[$name]))
 				{
 					if($this->scriptMap[$name]!==false)
+					{
 						$jsFiles[$position][$this->scriptMap[$name]]=$this->scriptMap[$name];
+					}
 				}
 				elseif(isset($this->scriptMap['*.js']))
 				{
 					if($this->scriptMap['*.js']!==false)
+					{
 						$jsFiles[$position][$this->scriptMap['*.js']]=$this->scriptMap['*.js'];
+					}
 				}
 				else
+				{
 					$jsFiles[$position][$scriptFile]=$scriptFileValue;
+				}
 			}
 		}
 		$this->scriptFiles=$jsFiles;
@@ -309,6 +334,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	protected function renderScriptBatch(array $scripts)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("renderScriptBatch(scripts = " . var_dump_ex_txt($scripts) . ")",'system.base.CClientScript');
 		$html = '';
 		$scriptBatches = array();
 		foreach($scripts as $scriptValue)
@@ -330,8 +356,12 @@ class CClientScript extends CApplicationComponent
 			$scriptBatches[$key]['scripts'][]=$scriptContent;
 		}
 		foreach($scriptBatches as $scriptBatch)
+		{
 			if(!empty($scriptBatch['scripts']))
+			{
 				$html.=CHtml::script(implode("\n",$scriptBatch['scripts']),$scriptBatch['htmlOptions'])."\n";
+			}
+		}
 		return $html;
 	}
 
@@ -340,8 +370,10 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function renderCoreScripts()
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("renderCoreScripts { coreScripts = " . var_dump_ex_txt($this->coreScripts) . " }",'system.base.CClientScript');
 		if($this->coreScripts===null)
 			return;
+
 		$cssFiles=array();
 		$jsFiles=array();
 		foreach($this->coreScripts as $name=>$package)
@@ -350,19 +382,25 @@ class CClientScript extends CApplicationComponent
 			if(!empty($package['js']))
 			{
 				foreach($package['js'] as $js)
+				{
 					$jsFiles[$baseUrl.'/'.$js]=$baseUrl.'/'.$js;
+				}
 			}
 			if(!empty($package['css']))
 			{
 				foreach($package['css'] as $css)
+				{
 					$cssFiles[$baseUrl.'/'.$css]='';
+				}
 			}
 		}
 		// merge in place
 		if($cssFiles!==array())
 		{
 			foreach($this->cssFiles as $cssFile=>$media)
+			{
 				$cssFiles[$cssFile]=$media;
+			}
 			$this->cssFiles=$cssFiles;
 		}
 		if($jsFiles!==array())
@@ -370,7 +408,9 @@ class CClientScript extends CApplicationComponent
 			if(isset($this->scriptFiles[$this->coreScriptPosition]))
 			{
 				foreach($this->scriptFiles[$this->coreScriptPosition] as $url => $value)
+				{
 					$jsFiles[$url]=$value;
+				}
 			}
 			$this->scriptFiles[$this->coreScriptPosition]=$jsFiles;
 		}
@@ -382,15 +422,24 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function renderHead(&$output)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("renderHead START",'system.base.CClientScript');
 		$html='';
 		foreach($this->metaTags as $meta)
+		{
 			$html.=CHtml::metaTag($meta['content'],null,null,$meta)."\n";
+		}
 		foreach($this->linkTags as $link)
+		{
 			$html.=CHtml::linkTag(null,null,null,null,$link)."\n";
+		}
 		foreach($this->cssFiles as $url=>$media)
+		{
 			$html.=CHtml::cssFile($url,$media)."\n";
+		}
 		foreach($this->css as $css)
+		{
 			$html.=CHtml::css($css[0],$css[1])."\n";
+		}
 		if($this->enableJavaScript)
 		{
 			if(isset($this->scriptFiles[self::POS_HEAD]))
@@ -398,14 +447,20 @@ class CClientScript extends CApplicationComponent
 				foreach($this->scriptFiles[self::POS_HEAD] as $scriptFileValueUrl=>$scriptFileValue)
 				{
 					if(is_array($scriptFileValue))
+					{
 						$html.=CHtml::scriptFile($scriptFileValueUrl,$scriptFileValue)."\n";
+					}
 					else
+					{
 						$html.=CHtml::scriptFile($scriptFileValueUrl)."\n";
+					}
 				}
 			}
 
 			if(isset($this->scripts[self::POS_HEAD]))
+			{
 				$html.=$this->renderScriptBatch($this->scripts[self::POS_HEAD]);
+			}
 		}
 
 		if($html!=='')
@@ -413,10 +468,15 @@ class CClientScript extends CApplicationComponent
 			$count=0;
 			$output=preg_replace('/(<title\b[^>]*>|<\\/head\s*>)/is','<###head###>$1',$output,1,$count);
 			if($count)
+			{
 				$output=str_replace('<###head###>',$html,$output);
+			}
 			else
+			{
 				$output=$html.$output;
+			}
 		}
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("renderHead --> " . var_dump_ex_txt($output) . "",'system.base.CClientScript');
 	}
 
 	/**
@@ -425,29 +485,41 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function renderBodyBegin(&$output)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("renderBodyBegin START",'system.base.CClientScript');
 		$html='';
 		if(isset($this->scriptFiles[self::POS_BEGIN]))
 		{
 			foreach($this->scriptFiles[self::POS_BEGIN] as $scriptFileUrl=>$scriptFileValue)
 			{
 				if(is_array($scriptFileValue))
+				{
 					$html.=CHtml::scriptFile($scriptFileUrl,$scriptFileValue)."\n";
+				}
 				else
+				{
 					$html.=CHtml::scriptFile($scriptFileUrl)."\n";
+				}
 			}
 		}
 		if(isset($this->scripts[self::POS_BEGIN]))
+		{
 			$html.=$this->renderScriptBatch($this->scripts[self::POS_BEGIN]);
+		}
 
 		if($html!=='')
 		{
 			$count=0;
 			$output=preg_replace('/(<body\b[^>]*>)/is','$1<###begin###>',$output,1,$count);
 			if($count)
+			{
 				$output=str_replace('<###begin###>',$html,$output);
+			}
 			else
+			{
 				$output=$html.$output;
+			}
 		}
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("renderBodyBegin --> " . var_dump_ex_txt($output) . "",'system.base.CClientScript');
 	}
 
 	/**
@@ -456,10 +528,12 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function renderBodyEnd(&$output)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("renderBodyEnd",'system.base.CClientScript');
 		if(!isset($this->scriptFiles[self::POS_END]) && !isset($this->scripts[self::POS_END])
 			&& !isset($this->scripts[self::POS_READY]) && !isset($this->scripts[self::POS_LOAD]))
+		{
 			return;
-
+		}
 		$fullPage=0;
 		$output=preg_replace('/(<\\/body\s*>)/is','<###end###>$1',$output,1,$fullPage);
 		$html='';
@@ -468,33 +542,52 @@ class CClientScript extends CApplicationComponent
 			foreach($this->scriptFiles[self::POS_END] as $scriptFileUrl=>$scriptFileValue)
 			{
 				if(is_array($scriptFileValue))
+				{
 					$html.=CHtml::scriptFile($scriptFileUrl,$scriptFileValue)."\n";
+				}
 				else
+				{
 					$html.=CHtml::scriptFile($scriptFileUrl)."\n";
+				}
 			}
 		}
 		$scripts=isset($this->scripts[self::POS_END]) ? $this->scripts[self::POS_END] : array();
 		if(isset($this->scripts[self::POS_READY]))
 		{
 			if($fullPage)
+			{
 				$scripts[]="jQuery(function($) {\n".implode("\n",$this->scripts[self::POS_READY])."\n});";
+			}
 			else
+			{
 				$scripts[]=implode("\n",$this->scripts[self::POS_READY]);
+			}
 		}
 		if(isset($this->scripts[self::POS_LOAD]))
 		{
 			if($fullPage)
+			{
 				$scripts[]="jQuery(window).on('load',function() {\n".implode("\n",$this->scripts[self::POS_LOAD])."\n});";
+			}
 			else
+			{
 				$scripts[]=implode("\n",$this->scripts[self::POS_LOAD]);
+			}
 		}
 		if(!empty($scripts))
+		{
 			$html.=$this->renderScriptBatch($scripts);
+		}
 
 		if($fullPage)
+		{
 			$output=str_replace('<###end###>',$html,$output);
+		}
 		else
+		{
 			$output=$output.$html;
+		}
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("renderBodyEnd --> " . var_dump_ex_txt($output) . "",'system.base.CClientScript');
 	}
 
 	/**
@@ -506,9 +599,13 @@ class CClientScript extends CApplicationComponent
 	public function getCoreScriptUrl()
 	{
 		if($this->_baseUrl!==null)
+		{
 			return $this->_baseUrl;
+		}
 		else
+		{
 			return $this->_baseUrl=Yii::app()->getAssetManager()->publish(YII_PATH.'/web/js/source');
+		}
 	}
 
 	/**
@@ -519,6 +616,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function setCoreScriptUrl($value)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("setCoreScriptUrl(value = '$value')",'system.base.CClientScript');
 		$this->_baseUrl=$value;
 	}
 
@@ -532,22 +630,33 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function getPackageBaseUrl($name)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("getPackageBaseUrl(name = '$name')",'system.base.CClientScript');
 		if(!isset($this->coreScripts[$name]))
+		{
 			return false;
+		}
 		$package=$this->coreScripts[$name];
 		if(isset($package['baseUrl']))
 		{
 			$baseUrl=$package['baseUrl'];
 			if($baseUrl==='' || $baseUrl[0]!=='/' && strpos($baseUrl,'://')===false)
+			{
 				$baseUrl=Yii::app()->getRequest()->getBaseUrl().'/'.$baseUrl;
+			}
 			$baseUrl=rtrim($baseUrl,'/');
 		}
 		elseif(isset($package['basePath']))
+		{
 			$baseUrl=Yii::app()->getAssetManager()->publish(Yii::getPathOfAlias($package['basePath']));
+		}
 		else
+		{
 			$baseUrl=$this->getCoreScriptUrl();
+		}
 
-		return $this->coreScripts[$name]['baseUrl']=$baseUrl;
+		$this->coreScripts[$name]['baseUrl']=$baseUrl;
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("getPackageBaseUrl --> " . var_dump_ex_txt($baseUrl) . "",'system.base.CClientScript');
+		return $baseUrl;
 	}
 
 	/**
@@ -560,6 +669,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function registerPackage($name)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("registerPackage(name = '$name')",'system.base.CClientScript');
 		return $this->registerCoreScript($name);
 	}
 
@@ -571,23 +681,34 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function registerCoreScript($name)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("registerCoreScript(name = '$name')",'system.base.CClientScript');
 		if(isset($this->coreScripts[$name]))
+		{
 			return $this;
+		}
 		if(isset($this->packages[$name]))
+		{
 			$package=$this->packages[$name];
+		}
 		else
 		{
 			if($this->corePackages===null)
+			{
 				$this->corePackages=require(YII_PATH.'/web/js/packages.php');
+			}
 			if(isset($this->corePackages[$name]))
+			{
 				$package=$this->corePackages[$name];
+			}
 		}
 		if(isset($package))
 		{
 			if(!empty($package['depends']))
 			{
 				foreach($package['depends'] as $p)
+				{
 					$this->registerCoreScript($p);
+				}
 			}
 			$this->coreScripts[$name]=$package;
 			$this->hasScripts=true;
@@ -605,6 +726,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function registerCssFile($url,$media='')
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("'registerCssFile(url = '$url', media = '$media')",'system.base.CClientScript');
 		$this->hasScripts=true;
 		$this->cssFiles[$url]=$media;
 		$params=func_get_args();
@@ -621,6 +743,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function registerCss($id,$css,$media='')
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("registerCss(id = '$id', css = '$css', media = '$media')",'system.base.CClientScript');
 		$this->hasScripts=true;
 		$this->css[$id]=array($css,$media);
 		$params=func_get_args();
@@ -642,11 +765,16 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function registerScriptFile($url,$position=null,array $htmlOptions=array())
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("registerScriptFile(url = '$url', position = $position, htmlOptions = " . var_dump_ex_txt($htmlOptions) . " )",'system.base.CClientScript');
 		if($position===null)
+		{
 			$position=$this->defaultScriptFilePosition;
+		}
 		$this->hasScripts=true;
 		if(empty($htmlOptions))
+		{
 			$value=$url;
+		}
 		else
 		{
 			$value=$htmlOptions;
@@ -676,21 +804,30 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function registerScript($id,$script,$position=null,array $htmlOptions=array())
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("registerScript(id = '$id', script = '$script', position = $position, htmlOptions = " . var_dump_ex_txt($htmlOptions) . " )",'system.base.CClientScript');
 		if($position===null)
+		{
 			$position=$this->defaultScriptPosition;
+		}
 		$this->hasScripts=true;
 		if(empty($htmlOptions))
+		{
 			$scriptValue=$script;
+		}
 		else
 		{
 			if($position==self::POS_LOAD || $position==self::POS_READY)
+			{
 				throw new CException(Yii::t('yii','Script HTML options are not allowed for "CClientScript::POS_LOAD" and "CClientScript::POS_READY".'));
+			}
 			$scriptValue=$htmlOptions;
 			$scriptValue['content']=$script;
 		}
 		$this->scripts[$position][$id]=$scriptValue;
 		if($position===self::POS_READY || $position===self::POS_LOAD)
+		{
 			$this->registerCoreScript('jquery');
+		}
 		$params=func_get_args();
 		$this->recordCachingAction('clientScript','registerScript',$params);
 		return $this;
@@ -718,9 +855,13 @@ class CClientScript extends CApplicationComponent
 	{
 		$this->hasScripts=true;
 		if($name!==null)
+		{
 			$options['name']=$name;
+		}
 		if($httpEquiv!==null)
+		{
 			$options['http-equiv']=$httpEquiv;
+		}
 		$options['content']=$content;
 		$this->metaTags[null===$id?count($this->metaTags):$id]=$options;
 		$params=func_get_args();
@@ -741,13 +882,21 @@ class CClientScript extends CApplicationComponent
 	{
 		$this->hasScripts=true;
 		if($relation!==null)
+		{
 			$options['rel']=$relation;
+		}
 		if($type!==null)
+		{
 			$options['type']=$type;
+		}
 		if($href!==null)
+		{
 			$options['href']=$href;
+		}
 		if($media!==null)
+		{
 			$options['media']=$media;
+		}
 		$this->linkTags[serialize($options)]=$options;
 		$params=func_get_args();
 		$this->recordCachingAction('clientScript','registerLinkTag',$params);
@@ -761,6 +910,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function isCssFileRegistered($url)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("isCssFileRegistered(url = '$url') --> " . var_dump_ex_txt($this->cssFiles[$url]) . "",'system.base.CClientScript');
 		return isset($this->cssFiles[$url]);
 	}
 
@@ -771,6 +921,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function isCssRegistered($id)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("isCssRegistered(íd = '$id') --> " . var_dump_ex_txt($this->css[$id]) . "",'system.base.CClientScript');
 		return isset($this->css[$id]);
 	}
 
@@ -787,6 +938,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function isScriptFileRegistered($url,$position=self::POS_HEAD)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("isScriptFileRegistered(url = '$url', position = $position) --> " . var_dump_ex_txt($this->scriptFiles[$position][$url]) . "",'system.base.CClientScript');
 		return isset($this->scriptFiles[$position][$url]);
 	}
 
@@ -805,6 +957,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function isScriptRegistered($id,$position=self::POS_READY)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("isScriptRegistered(id = '$id', position = $position) --> " . var_dump_ex_txt($this->scripts[$position][$id]) . "",'system.base.CClientScript');
 		return isset($this->scripts[$position][$id]);
 	}
 
@@ -821,7 +974,9 @@ class CClientScript extends CApplicationComponent
 	protected function recordCachingAction($context,$method,$params)
 	{
 		if(($controller=Yii::app()->getController())!==null)
+		{
 			$controller->recordCachingAction($context,$method,$params);
+		}
 	}
 
 	/**
@@ -836,6 +991,7 @@ class CClientScript extends CApplicationComponent
 	 */
 	public function addPackage($name,$definition)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("addPackage(name= '$name', definition = " . var_dump_ex_txt($definition) . " )",'system.base.CClientScript');
 		$this->packages[$name]=$definition;
 		return $this;
 	}

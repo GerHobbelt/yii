@@ -15,11 +15,15 @@ class ModelGenerator extends CCodeGenerator
 		{
 			$all = array();
 			if(!empty($db) && Yii::app()->hasComponent($db)!==false && (Yii::app()->getComponent($db) instanceof CDbConnection))
+			{
 				$all=array_keys(Yii::app()->{$db}->schema->getTables());
+			}
 
 			echo json_encode($all);
 		}
 		else
+		{
 			throw new CHttpException(404,'The requested page does not exist.');
+		}
 	}
 }

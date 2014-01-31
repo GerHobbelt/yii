@@ -28,6 +28,7 @@ class CInlineAction extends CAction
 	public function run()
 	{
 		$method='action'.$this->getId();
+		if(YII_DEBUG_ROUTING) Yii::trace("run { method = " . var_dump_ex_txt($method) . " }", "framework.web.actions.CInlineAction");
 		$this->getController()->$method();
 	}
 
@@ -43,10 +44,15 @@ class CInlineAction extends CAction
 		$methodName='action'.$this->getId();
 		$controller=$this->getController();
 		$method=new ReflectionMethod($controller, $methodName);
+		if(YII_DEBUG_ROUTING) Yii::trace("runWithParams(params = " . var_dump_ex_txt($params) . ") { methodName = " . var_dump_ex_txt($methodName) . ", controller = " . var_dump_ex_txt($controller) . ", method = " . var_dump_ex_txt($method) . " }", "framework.web.actions.CInlineAction");
 		if($method->getNumberOfParameters()>0)
+		{
 			return $this->runWithParamsInternal($controller, $method, $params);
+		}
 		else
+		{
 			return $controller->$methodName();
+		}
 	}
 
 }

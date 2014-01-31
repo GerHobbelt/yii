@@ -122,17 +122,27 @@ class CHttpRequest extends CApplicationComponent
 		if(function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc())
 		{
 			if(isset($_GET))
+			{
 				$_GET=$this->stripSlashes($_GET);
+			}
 			if(isset($_POST))
+			{
 				$_POST=$this->stripSlashes($_POST);
+			}
 			if(isset($_REQUEST))
+			{
 				$_REQUEST=$this->stripSlashes($_REQUEST);
+			}
 			if(isset($_COOKIE))
+			{
 				$_COOKIE=$this->stripSlashes($_COOKIE);
+			}
 		}
 
 		if($this->enableCsrfValidation)
+		{
 			Yii::app()->attachEventHandler('onBeginRequest',array($this,'validateCsrfToken'));
+		}
 	}
 
 
@@ -153,7 +163,9 @@ class CHttpRequest extends CApplicationComponent
 			return array_map(array($this,'stripSlashes'),$data);
 		}
 		else
+		{
 			return stripslashes($data);
+		}
 	}
 
 	/**
@@ -213,7 +225,9 @@ class CHttpRequest extends CApplicationComponent
 	public function getDelete($name,$defaultValue=null)
 	{
 		if($this->getIsDeleteViaPostRequest())
+		{
 			return $this->getPost($name, $defaultValue);
+		}
 
 		if($this->getIsDeleteRequest())
 		{
@@ -221,7 +235,9 @@ class CHttpRequest extends CApplicationComponent
 			return isset($restParams[$name]) ? $restParams[$name] : $defaultValue;
 		}
 		else
+		{
 			return $defaultValue;
+		}
 	}
 
 	/**
@@ -238,7 +254,9 @@ class CHttpRequest extends CApplicationComponent
 	public function getPut($name,$defaultValue=null)
 	{
 		if($this->getIsPutViaPostRequest())
+		{
 			return $this->getPost($name, $defaultValue);
+		}
 
 		if($this->getIsPutRequest())
 		{
@@ -246,7 +264,9 @@ class CHttpRequest extends CApplicationComponent
 			return isset($restParams[$name]) ? $restParams[$name] : $defaultValue;
 		}
 		else
+		{
 			return $defaultValue;
+		}
 	}
 
 	/**
@@ -279,7 +299,9 @@ class CHttpRequest extends CApplicationComponent
 	{
 		static $rawBody;
 		if($rawBody===null)
+		{
 			$rawBody=file_get_contents('php://input');
+		}
 		return $rawBody;
 	}
 
@@ -317,14 +339,18 @@ class CHttpRequest extends CApplicationComponent
 				$this->_hostInfo=$http.'://'.$_SERVER['SERVER_NAME'];
 				$port=$secure ? $this->getSecurePort() : $this->getPort();
 				if(($port!==80 && !$secure) || ($port!==443 && $secure))
+				{
 					$this->_hostInfo.=':'.$port;
+				}
 			}
 		}
 		if($schema!=='')
 		{
 			$secure=$this->getIsSecureConnection();
 			if($secure && $schema==='https' || !$secure && $schema==='http')
+			{
 				return $this->_hostInfo;
+			}
 
 			$port=$schema==='https' ? $this->getSecurePort() : $this->getPort();
 			if($port!==80 && $schema==='http' || $port!==443 && $schema==='https')
@@ -336,7 +362,9 @@ class CHttpRequest extends CApplicationComponent
 			return $schema.substr($this->_hostInfo,$pos,strcspn($this->_hostInfo,':',$pos+1)+1).$port;
 		}
 		else
+		{
 			return $this->_hostInfo;
+		}
 	}
 
 	/**
@@ -361,7 +389,9 @@ class CHttpRequest extends CApplicationComponent
 	public function getBaseUrl($absolute=false)
 	{
 		if($this->_baseUrl===null)
+		{
 			$this->_baseUrl=rtrim(dirname($this->getScriptUrl()),'\\/');
+		}
 		return $absolute ? $this->getHostInfo() . $this->_baseUrl : $this->_baseUrl;
 	}
 
@@ -429,18 +459,30 @@ class CHttpRequest extends CApplicationComponent
 		if($this->_pathInfo===null)
 		{
 			$pathInfo=$this->getRequestUri();
+			if(YII_DEBUG_ROUTING) Yii::trace("getPathInfo [1.begin] { pathInfo = ".var_dump_ex_txt($pathInfo).", this = ".var_dump_ex_txt($this)." }", "framework.web.CHttpRequest");
 
 			if(($pos=strpos($pathInfo,'?'))!==false)
+			{
 			   $pathInfo=substr($pathInfo,0,$pos);
+			}
+			if(YII_DEBUG_ROUTING) Yii::trace("getPathInfo [2.after ? query stripping] { pathInfo = ".var_dump_ex_txt($pathInfo)." }", "framework.web.CHttpRequest");
 
 			$pathInfo=$this->decodePathInfo($pathInfo);
+			if(YII_DEBUG_ROUTING) Yii::trace("getPathInfo [3.after decodePathInfo] { pathInfo = ".var_dump_ex_txt($pathInfo)." }", "framework.web.CHttpRequest");
 
 			$scriptUrl=$this->getScriptUrl();
 			$baseUrl=$this->getBaseUrl();
+			if(YII_DEBUG_ROUTING) Yii::trace("getPathInfo [4.script and base] { scriptUrl = ".var_dump_ex_txt($scriptUrl).", baseUrl = ".var_dump_ex_txt($baseUrl)." }", "framework.web.CHttpRequest");
 			if(strpos($pathInfo,$scriptUrl)===0)
+			{
 				$pathInfo=substr($pathInfo,strlen($scriptUrl));
+				if(YII_DEBUG_ROUTING) Yii::trace("getPathInfo [5.is script path] { pathInfo = ".var_dump_ex_txt($pathInfo).", scriptUrl = ".var_dump_ex_txt($scriptUrl).", baseUrl = ".var_dump_ex_txt($baseUrl)." }", "framework.web.CHttpRequest");
+			}
 			elseif($baseUrl==='' || strpos($pathInfo,$baseUrl)===0)
+			{
 				$pathInfo=substr($pathInfo,strlen($baseUrl));
+				if(YII_DEBUG_ROUTING) Yii::trace("getPathInfo [5.has base] { pathInfo = ".var_dump_ex_txt($pathInfo).", scriptUrl = ".var_dump_ex_txt($scriptUrl).", baseUrl = ".var_dump_ex_txt($baseUrl)." }", "framework.web.CHttpRequest");
+			}
 			elseif(strpos($_SERVER['PHP_SELF'],$scriptUrl)===0)
 			{
 				$rv=substr($_SERVER['PHP_SELF'],strlen($scriptUrl));
@@ -448,17 +490,28 @@ class CHttpRequest extends CApplicationComponent
 				{
 					$pathInfo = $rv;
 				}
+				if(YII_DEBUG_ROUTING) Yii::trace("getPathInfo [5.is PHP self] { ".var_dump_ex_txt(array('pathInfo' => $pathInfo,'PHP_SELF' => $_SERVER['PHP_SELF'], 'scriptUrl' => $scriptUrl, 'strpos' => strpos($_SERVER['PHP_SELF'],$scriptUrl), 'strlen' => strlen($scriptUrl), 'rv' => $rv, 'baseUrl' => $baseUrl))." }", "framework.web.CHttpRequest");
 			}
 			else
+			{
 				throw new CException(Yii::t('yii','CHttpRequest is unable to determine the path info of the request.'));
+			}
 
 			if($pathInfo==='/')
+			{
 				$pathInfo='';
+			}
 			elseif($pathInfo[0]==='/')
+			{
 				$pathInfo=substr($pathInfo,1);
+			}
+			if(YII_DEBUG_ROUTING) Yii::trace("getPathInfo [6.after cleaning] { pathInfo = ".var_dump_ex_txt($pathInfo).", scriptUrl = ".var_dump_ex_txt($scriptUrl).", baseUrl = ".var_dump_ex_txt($baseUrl)." }", "framework.web.CHttpRequest");
 
 			if(($posEnd=strlen($pathInfo)-1)>0 && $pathInfo[$posEnd]==='/')
+			{
 				$pathInfo=substr($pathInfo,0,$posEnd);
+			}
+			if(YII_DEBUG_ROUTING) Yii::trace("getPathInfo [7.done] { pathInfo = ".var_dump_ex_txt($pathInfo).", scriptUrl = ".var_dump_ex_txt($scriptUrl).", baseUrl = ".var_dump_ex_txt($baseUrl)." }", "framework.web.CHttpRequest");
 
 			$this->_pathInfo=$pathInfo;
 		}
@@ -511,26 +564,36 @@ class CHttpRequest extends CApplicationComponent
 		if($this->_requestUri===null)
 		{
 			if(isset($_SERVER['HTTP_X_REWRITE_URL'])) // IIS
+			{
 				$this->_requestUri=$_SERVER['HTTP_X_REWRITE_URL'];
+			}
 			elseif(isset($_SERVER['REQUEST_URI']))
 			{
 				$this->_requestUri=$_SERVER['REQUEST_URI'];
 				if(!empty($_SERVER['HTTP_HOST']))
 				{
 					if(strpos($this->_requestUri,$_SERVER['HTTP_HOST'])!==false)
+					{
 						$this->_requestUri=preg_replace('/^\w+:\/\/[^\/]+/','',$this->_requestUri);
+					}
 				}
 				else
+				{
 					$this->_requestUri=preg_replace('/^(http|https):\/\/[^\/]+/i','',$this->_requestUri);
+				}
 			}
 			elseif(isset($_SERVER['ORIG_PATH_INFO']))  // IIS 5.0 CGI
 			{
 				$this->_requestUri=$_SERVER['ORIG_PATH_INFO'];
 				if(!empty($_SERVER['QUERY_STRING']))
+				{
 					$this->_requestUri.='?'.$_SERVER['QUERY_STRING'];
+				}
 			}
 			else
+			{
 				throw new CException(Yii::t('yii','CHttpRequest is unable to determine the request URI.'));
+			}
 		}
 
 		return $this->_requestUri;
@@ -565,7 +628,9 @@ class CHttpRequest extends CApplicationComponent
 	public function getRequestType()
 	{
 		if(isset($_POST['_method']))
+		{
 			return strtoupper($_POST['_method']);
+		}
 
 		return strtoupper(isset($_SERVER['REQUEST_METHOD'])?$_SERVER['REQUEST_METHOD']:'GET');
 	}
@@ -699,9 +764,13 @@ class CHttpRequest extends CApplicationComponent
 	public function getScriptFile()
 	{
 		if($this->_scriptFile!==null)
+		{
 			return $this->_scriptFile;
+		}
 		else
+		{
 			return $this->_scriptFile=realpath($_SERVER['SCRIPT_FILENAME']);
+		}
 	}
 
 	/**
@@ -739,7 +808,9 @@ class CHttpRequest extends CApplicationComponent
 	public function getPort()
 	{
 		if($this->_port===null)
+		{
 			$this->_port=!$this->getIsSecureConnection() && isset($_SERVER['SERVER_PORT']) ? (int)$_SERVER['SERVER_PORT'] : 80;
+		}
 		return $this->_port;
 	}
 
@@ -770,7 +841,9 @@ class CHttpRequest extends CApplicationComponent
 	public function getSecurePort()
 	{
 		if($this->_securePort===null)
+		{
 			$this->_securePort=$this->getIsSecureConnection() && isset($_SERVER['SERVER_PORT']) ? (int)$_SERVER['SERVER_PORT'] : 443;
+		}
 		return $this->_securePort;
 	}
 
@@ -813,10 +886,14 @@ class CHttpRequest extends CApplicationComponent
 	public function redirect($url,$terminate=true,$statusCode=302)
 	{
 		if(strpos($url,'/')===0 && strpos($url,'//')!==0)
+		{
 			$url=$this->getHostInfo().$url;
+		}
 		header('Location: '.$url, true, $statusCode);
 		if($terminate)
+		{
 			Yii::app()->end();
+		}
 	}
 
 	/**
@@ -1063,7 +1140,9 @@ class CHttpRequest extends CApplicationComponent
 			header("Content-Range: bytes $contentStart-$contentEnd/$fileSize");
 		}
 		else
+		{
 			header('HTTP/1.1 200 OK');
+		}
 
 		$length=$contentEnd-$contentStart+1; // Calculate new content length
 
@@ -1087,7 +1166,9 @@ class CHttpRequest extends CApplicationComponent
 			exit(0);
 		}
 		else
+		{
 			echo $content;
+		}
 	}
 
 	/**
@@ -1160,24 +1241,34 @@ class CHttpRequest extends CApplicationComponent
 		if(!isset($options['mimeType']))
 		{
 			if(($options['mimeType']=CFileHelper::getMimeTypeByExtension($filePath))===null)
+			{
 				$options['mimeType']='text/plain';
+			}
 		}
 
 		if(!isset($options['xHeader']))
+		{
 			$options['xHeader']='X-Sendfile';
+		}
 
 		if($options['mimeType']!==null)
+		{
 			header('Content-Type: '.$options['mimeType']);
+		}
 		header('Content-Disposition: '.$disposition.'; filename="'.$options['saveName'].'"');
 		if(isset($options['addHeaders']))
 		{
 			foreach($options['addHeaders'] as $header=>$value)
+			{
 				header($header.': '.$value);
+			}
 		}
 		header(trim($options['xHeader']).': '.$filePath);
 
 		if(!isset($options['terminate']) || $options['terminate'])
+		{
 			Yii::app()->end();
+		}
 	}
 
 	/**
@@ -1240,14 +1331,15 @@ class CHttpRequest extends CApplicationComponent
 			$method=$this->getRequestType();
 			switch($method)
 			{
-				case 'POST':
-					$userToken=$this->getPost($this->csrfTokenName);
+			case 'POST':
+				$userToken=$this->getPost($this->csrfTokenName);
 				break;
-				case 'PUT':
-					$userToken=$this->getPut($this->csrfTokenName);
+			case 'PUT':
+				$userToken=$this->getPut($this->csrfTokenName);
 				break;
-				case 'DELETE':
-					$userToken=$this->getDelete($this->csrfTokenName);
+			case 'DELETE':
+				$userToken=$this->getDelete($this->csrfTokenName);
+				break;
 			}
 
 			if (!empty($userToken) && $cookies->contains($this->csrfTokenName))
@@ -1256,9 +1348,13 @@ class CHttpRequest extends CApplicationComponent
 				$valid=$cookieToken===$userToken;
 			}
 			else
+			{
 				$valid = false;
+			}
 			if (!$valid)
+			{
 				throw new CHttpException(400,Yii::t('yii','The CSRF token could not be verified.'));
+			}
 		}
 	}
 }
@@ -1317,13 +1413,17 @@ class CCookieCollection extends CMap
 			foreach($_COOKIE as $name=>$value)
 			{
 				if(is_string($value) && ($value=$sm->validateData($value))!==false)
+				{
 					$cookies[$name]=new CHttpCookie($name,@unserialize($value));
+				}
 			}
 		}
 		else
 		{
 			foreach($_COOKIE as $name=>$value)
+			{
 				$cookies[$name]=new CHttpCookie($name,$value);
+			}
 		}
 		return $cookies;
 	}
@@ -1343,10 +1443,14 @@ class CCookieCollection extends CMap
 			$this->remove($name);
 			parent::add($name,$cookie);
 			if($this->_initialized)
+			{
 				$this->addCookie($cookie);
+			}
 		}
 		else
+		{
 			throw new CException(Yii::t('yii','CHttpCookieCollection can only hold CHttpCookie objects.'));
+		}
 	}
 
 	/**
@@ -1389,7 +1493,9 @@ class CCookieCollection extends CMap
 	{
 		$value=$cookie->value;
 		if($this->_request->enableCookieValidation)
+		{
 			$value=Yii::app()->getSecurityManager()->hashData(serialize($value));
+		}
 		if(version_compare(PHP_VERSION,'5.2.0','>='))
 			setcookie($cookie->name,$value,$cookie->expire,$cookie->path,$cookie->domain,$cookie->secure,$cookie->httpOnly);
 		else

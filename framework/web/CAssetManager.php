@@ -205,16 +205,24 @@ class CAssetManager extends CApplicationComponent
 	 */
 	public function publish($path,$hashByName=false,$level=-1,$forceCopy=null)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("publish(path = '$path', hashByName = " . var_dump_ex_txt($hashByName) . ", level = " . var_dump_ex_txt($level) . ", forceCopy = " . var_dump_ex_txt($forceCopy) . ")",'system.base.CAssetManager');
 		if($forceCopy===null)
+		{
 			$forceCopy=$this->forceCopy;
+		}
 		if($forceCopy && $this->linkAssets)
+		{
 			throw new CException(Yii::t('yii','The "forceCopy" and "linkAssets" cannot be both true.'));
+		}
 		if(isset($this->_published[$path]))
+		{
 			return $this->_published[$path];
+		}
 		elseif(($src=realpath($path))!==false)
 		{
 			$dir=$this->generatePath($src,$hashByName);
 			$dstDir=$this->getBasePath().DIRECTORY_SEPARATOR.$dir;
+			if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("publish: generatePath(src = '$src', hashByName = '$hashByName') -> { dir = '$dir', dstDir = '$dstDir' }",'system.base.CAssetManager');
 			if(is_file($src))
 			{
 				$fileName=basename($src);
@@ -237,6 +245,7 @@ class CAssetManager extends CApplicationComponent
 			}
 			elseif(is_dir($src))
 			{
+				if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("publish: copy entire directory",'system.base.CAssetManager');
 				if($this->linkAssets && !is_dir($dstDir))
 				{
 					symlink($src,$dstDir);

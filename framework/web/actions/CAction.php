@@ -70,6 +70,7 @@ abstract class CAction extends CComponent implements IAction
 	public function runWithParams($params)
 	{
 		$method=new ReflectionMethod($this, 'run');
+		if(YII_DEBUG_ROUTING) Yii::trace("runWithParams(params = " . var_dump_ex_txt($params) . ") { methodName = run, method = " . var_dump_ex_txt($method) . " }", "framework.web.actions.CAction");
 		if($method->getNumberOfParameters()>0)
 			return $this->runWithParamsInternal($this, $method, $params);
 		else
@@ -87,6 +88,7 @@ abstract class CAction extends CComponent implements IAction
 	 */
 	protected function runWithParamsInternal($object, $method, $params)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("runWithParamsInternal(object = " . var_dump_ex_txt($object) . ", method = " . var_dump_ex_txt($method) . ", params = " . var_dump_ex_txt($params) . ", method = " . var_dump_ex_txt($method) . " ) --> method parameters = " . var_dump_ex_txt($method->getParameters()) . " }", "framework.web.actions.CAction");
 		$ps=array();
 		foreach($method->getParameters() as $i=>$param)
 		{
@@ -94,16 +96,26 @@ abstract class CAction extends CComponent implements IAction
 			if(isset($params[$name]))
 			{
 				if($param->isArray())
+				{
 					$ps[]=is_array($params[$name]) ? $params[$name] : array($params[$name]);
+				}
 				elseif(!is_array($params[$name]))
+				{
 					$ps[]=$params[$name];
+				}
 				else
+				{
 					return false;
+				}
 			}
 			elseif($param->isDefaultValueAvailable())
+			{
 				$ps[]=$param->getDefaultValue();
+			}
 			else
+			{
 				return false;
+			}
 		}
 		$method->invokeArgs($object,$ps);
 		return true;

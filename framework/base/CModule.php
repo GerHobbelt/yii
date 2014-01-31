@@ -269,7 +269,9 @@ abstract class CModule extends CComponent
 	public function getModule($id)
 	{
 		if(isset($this->_modules[$id]) || array_key_exists($id,$this->_modules))
+		{
 			return $this->_modules[$id];
+		}
 		elseif(isset($this->_moduleConfig[$id]))
 		{
 			$config=$this->_moduleConfig[$id];
@@ -279,9 +281,13 @@ abstract class CModule extends CComponent
 				$class=$config['class'];
 				unset($config['class'], $config['enabled']);
 				if($this===Yii::app())
+				{
 					$module=Yii::createComponent($class,$id,null,$config);
+				}
 				else
+				{
 					$module=Yii::createComponent($class,$this->getId().'/'.$id,$this,$config);
+				}
 				return $this->_modules[$id]=$module;
 			}
 		}
@@ -375,7 +381,9 @@ abstract class CModule extends CComponent
 	public function getComponent($id,$createIfNull=true)
 	{
 		if(isset($this->_components[$id]))
+		{
 			return $this->_components[$id];
+		}
 		elseif(isset($this->_componentConfig[$id]) && $createIfNull)
 		{
 			$config=$this->_componentConfig[$id];

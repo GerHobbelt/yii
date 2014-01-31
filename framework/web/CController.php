@@ -256,6 +256,7 @@ class CController extends CBaseController
 	 */
 	public function run($actionID)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("run(actionID = " . var_dump_ex_txt($actionID) . ")", "framework.web.CController");
 		if(($action=$this->createAction($actionID))!==null)
 		{
 			if(($parent=$this->getModule())===null)
@@ -267,7 +268,9 @@ class CController extends CBaseController
 			}
 		}
 		else
+		{
 			$this->missingAction($actionID);
+		}
 	}
 
 	/**
@@ -282,8 +285,11 @@ class CController extends CBaseController
 	 */
 	public function runActionWithFilters($action,$filters)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("runActionWithFilters(action = " . var_dump_ex_txt($action) . ", filters = " . var_dump_ex_txt($filters) . " )", "framework.web.CController");
 		if(empty($filters))
+		{
 			$this->runAction($action);
+		}
 		else
 		{
 			$priorAction=$this->_action;
@@ -303,6 +309,7 @@ class CController extends CBaseController
 	{
 		$priorAction=$this->_action;
 		$this->_action=$action;
+		if(YII_DEBUG_ROUTING) Yii::trace("runAction(action = " . var_dump_ex_txt($action) . ") { priorAction = " . var_dump_ex_txt($priorAction) . " }", "framework.web.CController");
 		if($this->beforeAction($action))
 		{
 			if($action->runWithParams($this->getActionParams())===false)
@@ -1055,10 +1062,13 @@ class CController extends CBaseController
 	 */
 	public function recordCachingAction($context,$method,$params)
 	{
+		if(YII_DEBUG_JS_CSS_PACKAGES) Yii::trace("recordCachingAction(context = '$context', method = '$method', params = " . var_dump_ex_txt($params) . " )",'system.base.CController');
 		if($this->_cachingStack) // record only when there is an active output cache
 		{
 			foreach($this->_cachingStack as $cache)
+			{
 				$cache->recordAction($context,$method,$params);
+			}
 		}
 	}
 

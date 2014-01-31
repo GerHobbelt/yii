@@ -359,29 +359,51 @@ class CUrlManager extends CApplicationComponent
 	 */
 	public function parseUrl($request)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [M1.begin] (manager = ".var_dump_ex_txt($this).", request = ".var_dump_ex_txt($request).") { routeVar = [" . $this->routeVar . "] = " . var_dump_ex_txt(isset($_GET[$this->routeVar]) ? $_GET[$this->routeVar] : "--nil--") . " }", "framework.web.CUrlManager");
 		if($this->getUrlFormat()===self::PATH_FORMAT)
 		{
 			$rawPathInfo=$request->getPathInfo();
 			$pathInfo=$this->removeUrlSuffix($rawPathInfo,$this->urlSuffix);
+			if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [M1.path info] { rawPathInfo = " . var_dump_ex_txt($rawPathInfo) . ", pathInfo = " . var_dump_ex_txt($pathInfo) . " }", "framework.web.CUrlManager");
 			foreach($this->_rules as $i=>$rule)
 			{
 				if(is_array($rule))
+				{
 					$this->_rules[$i]=$rule=Yii::createComponent($rule);
+				}
 				if(($r=$rule->parseUrl($this,$request,$pathInfo,$rawPathInfo))!==false)
+				{
+					if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [M2.route rule match] { r = " . var_dump_ex_txt($r) . ", routeVar = [" . $this->routeVar . "] --> " . var_dump_ex_txt(isset($_GET[$this->routeVar]) ? $_GET[$this->routeVar] : $r) . " }", "framework.web.CUrlManager");
 					return isset($_GET[$this->routeVar]) ? $_GET[$this->routeVar] : $r;
+				}
 			}
 			if($this->useStrictParsing)
+			{
+				if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [M3.useStrictParsing]", "framework.web.CUrlManager");
 				throw new CHttpException(404,Yii::t('yii','Unable to resolve the request "{route}".',
 					array('{route}'=>$pathInfo)));
+			}
 			else
+			{
+				if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [M4.use pathInfo] --> " . var_dump_ex_txt($pathInfo), "framework.web.CUrlManager");
 				return $pathInfo;
+			}
 		}
 		elseif(isset($_GET[$this->routeVar]))
+		{
+			if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [M5.GET routeVar] { routeVar = [" . $this->routeVar . "] } --> " . var_dump_ex_txt($_GET[$this->routeVar]), "framework.web.CUrlManager");
 			return $_GET[$this->routeVar];
+		}
 		elseif(isset($_POST[$this->routeVar]))
+		{
+			if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [M6.POST routeVar] { routeVar = [" . $this->routeVar . "] } --> " . var_dump_ex_txt($_POST[$this->routeVar]), "framework.web.CUrlManager");
 			return $_POST[$this->routeVar];
+		}
 		else
+		{
+			if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [M7.nil]", "framework.web.CUrlManager");
 			return '';
+		}
 	}
 
 	/**
@@ -815,37 +837,52 @@ class CUrlRule extends CBaseUrlRule
 	 */
 	public function parseUrl($manager,$request,$pathInfo,$rawPathInfo)
 	{
-		if($this->verb!==null && !in_array($request->getRequestType(), $this->verb, true))
+		if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [1.begin] (urlRule = ".var_dump_ex_txt($this).", manager = ".var_dump_ex_txt($manager).", request = ".var_dump_ex_txt($request).", pathInfo = '$pathInfo', rawPathInfo = '$rawPathInfo') { requestType = " . $request->getRequestType() . " }", "framework.web.CUrlRule");
+		if($this->verb!==null && !in_array($request->getRequestType(), $this->verb, true)) 
+		{
+			if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [2.unaccepted reqType] { verb = [" . $this->verb . "] } --> FALSE", "framework.web.CUrlRule");
 			return false;
+		}
 
 		if($manager->caseSensitive && $this->caseSensitive===null || $this->caseSensitive)
 			$case='';
 		else
 			$case='i';
 
-		if($this->urlSuffix!==null)
+		if($this->urlSuffix!==null) 
+		{
 			$pathInfo=$manager->removeUrlSuffix($rawPathInfo,$this->urlSuffix);
+		}
 
 		// URL suffix required, but not found in the requested URL
 		$useStrictParsing=$this->useStrictParsing===null ? $manager->useStrictParsing : $this->useStrictParsing;
 		if($useStrictParsing && $pathInfo===$rawPathInfo)
 		{
 			$urlSuffix=$this->urlSuffix===null ? $manager->urlSuffix : $this->urlSuffix;
-			if($urlSuffix!='' && $urlSuffix!=='/')
+			if($urlSuffix!='' && $urlSuffix!=='/') 
+			{
+				if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [3.useStrictParsing] { this->suffix = '" . $this->urlSuffix . "', manager->suffix = '" . $manager->urlSuffix . ", 'this->useStrictParsing = '" . $this->useStrictParsing . "', manager->useStrictParsing = '" . $manager->useStrictParsing . "' } --> FALSE", "framework.web.CUrlRule");
 				return false;
+			}
 		}
 
-		if($this->hasHostInfo)
+		if($this->hasHostInfo) 
+		{
 			$pathInfo=strtolower($request->getHostInfo()).rtrim('/'.$pathInfo,'/');
+		}
 
 		$pathInfo.='/';
 
+		if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [4] preg_match(pattern+case = '".$this->pattern.$case."', pathInfo = '$pathInfo', ...)", "framework.web.CUrlRule");
 		if(preg_match($this->pattern.$case,$pathInfo,$matches))
 		{
+			if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [4.regex match!] preg_match() --> matches:\n" . var_dump_ex_txt($matches), "framework.web.CUrlRule");
 			foreach($this->defaultParams as $name=>$value)
 			{
 				if(!isset($_GET[$name]))
+				{
 					$_REQUEST[$name]=$_GET[$name]=$value;
+				}
 			}
 			$tr=array();
 			foreach($matches as $key=>$value)
@@ -856,13 +893,25 @@ class CUrlRule extends CBaseUrlRule
 					$_REQUEST[$key]=$_GET[$key]=$value;
 			}
 			if($pathInfo!==$matches[0]) // there're additional GET params
+			{
 				$manager->parsePathInfo(ltrim(substr($pathInfo,strlen($matches[0])),'/'));
+			}
+
 			if($this->routePattern!==null)
+			{
+				if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [5.has routePattern] --> ".var_dump_ex_txt(array('route'=>$this->route, 'tr'=>$tr, 'routePattern'=>$this->routePattern)), "framework.web.CUrlRule");
 				return strtr($this->route,$tr);
+			}
 			else
+			{
+				if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [6.route match!] --> ".var_dump_ex_txt(array('route'=>$this->route)), "framework.web.CUrlRule");
 				return $this->route;
+			}
 		}
 		else
+		{
+			if(YII_DEBUG_ROUTING) Yii::trace("parseUrl [7.regex fail] --> FALSE", "framework.web.CUrlRule");
 			return false;
+		}
 	}
 }

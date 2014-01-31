@@ -27,7 +27,7 @@ abstract class CJuiWidget extends CWidget
 	 * Note that under this URL, there must be a file whose name is specified by {@link scriptFile}.
 	 * Do not append any slash character to the URL.
 	 */
-	public $scriptUrl;
+	public $scriptUrl='../../../lib/_';
 	/**
 	 * @var string the root URL that contains all JUI theme folders.
 	 * If this property is not set (default), Yii will publish the JUI package included in the zii release and use
@@ -36,14 +36,14 @@ abstract class CJuiWidget extends CWidget
 	 * Note that under this URL, there must be a directory whose name is specified by {@link theme}.
 	 * Do not append any slash character to the URL.
 	 */
-	public $themeUrl;
+	public $themeUrl='../../../lib/_/jquery-ui-themes/themes';
 	/**
 	 * @var string the JUI theme name. Defaults to 'base'. Make sure that under {@link themeUrl} there
 	 * is a directory whose name is the same as this property value (case-sensitive).
 	 */
 	public $theme='base';
 	/**
-	 * @var mixed the main JUI JavaScript file. Defaults to 'jquery-ui.min.js'.
+	 * @var mixed the main JUI JavaScript file. Defaults to 'jquery-ui.js'.
 	 * Note the file must exist under the URL specified by {@link scriptUrl}.
 	 * If you need to include multiple script files (e.g. during development, you want to include individual
 	 * plugin script files rather than the minized JUI script file), you may set this property
@@ -51,7 +51,7 @@ abstract class CJuiWidget extends CWidget
 	 * This property can also be set as false, which means the widget will not include any script file,
 	 * and it is your responsibility to explicitly include it somewhere else.
 	 */
-	public $scriptFile='jquery-ui.min.js';
+	public $scriptFile=false;
 	/**
 	 * @var mixed the theme CSS file name. Defaults to 'jquery-ui.css'.
 	 * Note the file must exist under the URL specified by {@link themeUrl}/{@link theme}.
@@ -60,7 +60,7 @@ abstract class CJuiWidget extends CWidget
 	 * This property can also be set as false, which means the widget will not include any theme CSS file,
 	 * and it is your responsibility to explicitly include it somewhere else.
 	 */
-	public $cssFile='jquery-ui.css';
+	public $cssFile=false;
 	/**
 	 * @var array the initial JavaScript options that should be passed to the JUI plugin.
 	 */
@@ -95,9 +95,13 @@ abstract class CJuiWidget extends CWidget
 		{
 			$cs=Yii::app()->getClientScript();
 			if($this->scriptUrl===null)
+			{
 				$this->scriptUrl=$cs->getCoreScriptUrl().'/jui/js';
+			}
 			if($this->themeUrl===null)
+			{
 				$this->themeUrl=$cs->getCoreScriptUrl().'/jui/css';
+			}
 		}
 	}
 
@@ -109,20 +113,29 @@ abstract class CJuiWidget extends CWidget
 	{
 		$cs=Yii::app()->getClientScript();
 		if(is_string($this->cssFile))
+		{
 			$cs->registerCssFile($this->themeUrl.'/'.$this->theme.'/'.$this->cssFile);
+		}
 		elseif(is_array($this->cssFile))
 		{
 			foreach($this->cssFile as $cssFile)
+			{
 				$cs->registerCssFile($this->themeUrl.'/'.$this->theme.'/'.$cssFile);
+			}
 		}
 
 		$cs->registerCoreScript('jquery');
+		$cs->registerCoreScript('jquery-ui');
 		if(is_string($this->scriptFile))
+		{
 			$this->registerScriptFile($this->scriptFile);
+		}
 		elseif(is_array($this->scriptFile))
 		{
 			foreach($this->scriptFile as $scriptFile)
+			{
 				$this->registerScriptFile($scriptFile);
+			}
 		}
 	}
 

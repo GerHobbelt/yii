@@ -58,6 +58,7 @@ class CFilterChain extends CList
 		$chain=new CFilterChain($controller,$action);
 
 		$actionID=$action->getId();
+		if(YII_DEBUG_ROUTING) Yii::trace("CFilterChain::create(controller = " . var_dump_ex_txt($controller) . ", action = " . var_dump_ex_txt($action) . ", filters = " . var_dump_ex_txt($filters) . " ) --> { actionID = " . var_dump_ex_txt($actionID) . " }", "framework.web.CController");
 		foreach($filters as $filter)
 		{
 			if(is_string($filter))  // filterName [+|- action1 action2]

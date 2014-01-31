@@ -161,7 +161,9 @@ class CWebService extends CComponent
 	{
 		header('Content-Type: text/xml;charset='.$this->encoding);
 		if(YII_DEBUG)
+		{
 			ini_set("soap.wsdl_cache_enabled",0);
+		}
 		$server=new SoapServer($this->wsdlUrl,$this->getOptions());
 		Yii::app()->attachEventHandler('onError',array($this,'handleError'));
 		try
@@ -199,7 +201,9 @@ class CWebService extends CComponent
 			}
 			$message=$e->getMessage();
 			if(YII_DEBUG)
+			{
 				$message.=' ('.$e->getFile().':'.$e->getLine().")\n".$e->getTraceAsString();
+			}
 
 			// We need to end application explicitly because of
 			// http://bugs.php.net/bug.php?id=49513

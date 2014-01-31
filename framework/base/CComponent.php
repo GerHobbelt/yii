@@ -108,7 +108,9 @@ class CComponent
 	{
 		$getter='get'.$name;
 		if(method_exists($this,$getter))
+		{
 			return $this->$getter();
+		}
 		elseif(strncasecmp($name,'on',2)===0 && method_exists($this,$name))
 		{
 			// duplicating getEventHandlers() here for performance
@@ -118,7 +120,9 @@ class CComponent
 			return $this->_e[$name];
 		}
 		elseif(isset($this->_m[$name]))
+		{
 			return $this->_m[$name];
+		}
 		elseif(is_array($this->_m))
 		{
 			foreach($this->_m as $object)

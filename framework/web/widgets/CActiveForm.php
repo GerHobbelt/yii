@@ -975,15 +975,21 @@ class CActiveForm extends CWidget
 	{
 		$result=array();
 		if(!is_array($models))
+		{
 			$models=array($models);
+		}
 		foreach($models as $model)
 		{
 			$modelName=CHtml::modelName($model);
 			if($loadInput && isset($_POST[$modelName]))
+			{
 				$model->attributes=$_POST[$modelName];
+			}
 			$model->validate($attributes);
 			foreach($model->getErrors() as $attribute=>$errors)
+			{
 				$result[CHtml::activeId($model,$attribute)]=$errors;
+			}
 		}
 		return function_exists('json_encode') ? json_encode($result) : CJSON::encode($result);
 	}
@@ -1004,15 +1010,21 @@ class CActiveForm extends CWidget
 	{
 		$result=array();
 		if(!is_array($models))
+		{
 			$models=array($models);
+		}
 		foreach($models as $i=>$model)
 		{
 			$modelName=CHtml::modelName($model);
 			if($loadInput && isset($_POST[$modelName][$i]))
+			{
 				$model->attributes=$_POST[$modelName][$i];
+			}
 			$model->validate($attributes);
 			foreach($model->getErrors() as $attribute=>$errors)
+			{
 				$result[CHtml::activeId($model,'['.$i.']'.$attribute)]=$errors;
+			}
 		}
 		return function_exists('json_encode') ? json_encode($result) : CJSON::encode($result);
 	}

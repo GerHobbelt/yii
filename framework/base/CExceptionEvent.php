@@ -29,6 +29,7 @@ class CExceptionEvent extends CEvent
 	 */
 	public function __construct($sender,$exception)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("new CExceptionEvent(sender = " . var_dump_ex_txt($sender) . ", exception = " . var_dump_ex_txt($exception) . " )", "framework.base.CExceptionEvent");
 		$this->exception=$exception;
 		parent::__construct($sender);
 	}

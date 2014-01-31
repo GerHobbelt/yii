@@ -93,6 +93,8 @@ class CErrorHandler extends CApplicationComponent
 	 */
 	public function handle($event)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("handle(event = " . var_dump_ex_txt($event) . " )", "framework.base.CErrorHandler");
+		
 		// set event as handled to prevent it from being handled by other event handlers
 		$event->handled=true;
 
@@ -128,9 +130,13 @@ class CErrorHandler extends CApplicationComponent
 		}
 
 		if($event instanceof CExceptionEvent)
+		{
 			$this->handleException($event->exception);
+		}
 		else // CErrorEvent
+		{
 			$this->handleError($event);
+		}
 	}
 
 	/**
@@ -167,6 +173,7 @@ class CErrorHandler extends CApplicationComponent
 	 */
 	protected function handleException($exception)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("handleException(exception = " . var_dump_ex_txt($exception) . " )", "framework.base.CErrorHandler");
 		$app=Yii::app();
 		if($app instanceof CWebApplication)
 		{
@@ -210,12 +217,16 @@ class CErrorHandler extends CApplicationComponent
 			);
 
 			if(!headers_sent())
+			{
 				header("HTTP/1.0 {$data['code']} ".$this->getHttpHeader($data['code'], get_class($exception)));
+			}
 
 			$this->renderException();
 		}
 		else
+		{
 			$app->displayException($exception);
+		}
 	}
 
 	/**
@@ -225,9 +236,12 @@ class CErrorHandler extends CApplicationComponent
 	protected function handleError($event)
 	{
 		$trace=debug_backtrace();
+		if(YII_DEBUG_ROUTING) Yii::trace("handleError(event = " . var_dump_ex_txt($event) . " ) --> { trace = " . var_dump_ex_txt($trace) . " }", "framework.base.CErrorHandler");
 		// skip the first 3 stacks as they do not tell the error position
 		if(count($trace)>3)
+		{
 			$trace=array_slice($trace,3);
+		}
 		$traceString='';
 		foreach($trace as $i=>$t)
 		{
@@ -285,11 +299,15 @@ class CErrorHandler extends CApplicationComponent
 				'traces'=>$trace,
 			);
 			if(!headers_sent())
+			{
 				header("HTTP/1.0 500 Internal Server Error");
+			}
 			$this->renderError();
 		}
 		else
+		{
 			$app->displayError($event->code,$event->message,$event->file,$event->line);
+		}
 	}
 
 	/**
@@ -314,7 +332,9 @@ class CErrorHandler extends CApplicationComponent
 		{
 			// property access exception
 			if(isset($trace['function']) && ($trace['function']==='__get' || $trace['function']==='__set'))
+			{
 				return $trace;
+			}
 		}
 		return null;
 	}
@@ -330,6 +350,7 @@ class CErrorHandler extends CApplicationComponent
 		$data['version']=$this->getVersionInfo();
 		$data['time']=time();
 		$data['admin']=$this->adminInfo;
+		if(YII_DEBUG_ROUTING) Yii::trace("render(view = " . var_dump_ex_txt($view) . ", data = " . var_dump_ex_txt($data) . " )", "framework.base.CErrorHandler");
 		include($this->getViewFile($view,$data['code']));
 	}
 
@@ -340,14 +361,21 @@ class CErrorHandler extends CApplicationComponent
 	protected function renderException()
 	{
 		$exception=$this->getException();
+		if(YII_DEBUG_ROUTING) Yii::trace("renderException { " . var_dump_ex_txt($exception) . " }", "framework.base.CErrorHandler");
 		if($exception instanceof CHttpException || !YII_DEBUG)
+		{
 			$this->renderError();
+		}
 		else
 		{
 			if($this->isAjaxRequest())
+			{
 				Yii::app()->displayException($exception);
+			}
 			else
+			{
 				$this->render('exception',$this->getError());
+			}
 		}
 	}
 
@@ -358,16 +386,28 @@ class CErrorHandler extends CApplicationComponent
 	protected function renderError()
 	{
 		if($this->errorAction!==null)
+		{
+			if(YII_DEBUG_ROUTING) Yii::trace("renderError { error route --> " . var_dump_ex_txt($this->errorAction) . " }", "framework.base.CErrorHandler");
 			Yii::app()->runController($this->errorAction);
+		}
 		else
 		{
 			$data=$this->getError();
 			if($this->isAjaxRequest())
+			{
+				if(YII_DEBUG_ROUTING) Yii::trace("renderError { AJAX :: error --> " . var_dump_ex_txt($data) . " }", "framework.base.CErrorHandler");
 				Yii::app()->displayError($data['code'],$data['message'],$data['file'],$data['line']);
+			}
 			elseif(YII_DEBUG)
+			{
+				if(YII_DEBUG_ROUTING) Yii::trace("renderError { DEBUG :: exception error --> " . var_dump_ex_txt($data) . " }", "framework.base.CErrorHandler");
 				$this->render('exception',$data);
+			}
 			else
+			{
+				if(YII_DEBUG_ROUTING) Yii::trace("renderError { error --> " . var_dump_ex_txt($data) . " }", "framework.base.CErrorHandler");
 				$this->render('error',$data);
+			}
 		}
 	}
 

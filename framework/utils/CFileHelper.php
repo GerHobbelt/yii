@@ -58,7 +58,9 @@ class CFileHelper
 		$level=-1;
 		extract($options);
 		if(!is_dir($dst))
+		{
 			self::createDirectory($dst,isset($options['newDirMode'])?$options['newDirMode']:null,true);
+		}
 
 		self::copyDirectoryRecursive($src,$dst,'',$fileTypes,$exclude,$level,$options);
 	}

@@ -130,14 +130,19 @@ class CWebApplication extends CApplication
 	 */
 	public function processRequest()
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("processRequest --> { this = " . var_dump_ex_txt($this) . " }", "framework.base.CErrorHandler");
 		if(is_array($this->catchAllRequest) && isset($this->catchAllRequest[0]))
 		{
 			$route=$this->catchAllRequest[0];
 			foreach(array_splice($this->catchAllRequest,1) as $name=>$value)
+			{
 				$_GET[$name]=$value;
+			}
 		}
 		else
+		{
 			$route=$this->getUrlManager()->parseUrl($this->getRequest());
+		}
 		$this->runController($route);
 	}
 
@@ -273,18 +278,22 @@ class CWebApplication extends CApplication
 	 */
 	public function runController($route)
 	{
+		if(YII_DEBUG_ROUTING) Yii::trace("runController(route = " . var_dump_ex_txt($route) . " )", "framework.web.CWebApplication");
 		if(($ca=$this->createController($route))!==null)
 		{
 			list($controller,$actionID)=$ca;
 			$oldController=$this->_controller;
 			$this->_controller=$controller;
+			if(YII_DEBUG_ROUTING) Yii::trace("runController { exec controller = " . var_dump_ex_txt($controller) . ", actionID = " . var_dump_ex_txt($actionID) . " )", "framework.web.CWebApplication");
 			$controller->init();
 			$controller->run($actionID);
 			$this->_controller=$oldController;
 		}
 		else
+		{
 			throw new CHttpException(404,Yii::t('yii','Unable to resolve the request "{route}".',
 				array('{route}'=>$route===''?$this->defaultController:$route)));
+		}
 	}
 
 	/**
@@ -310,9 +319,14 @@ class CWebApplication extends CApplication
 	public function createController($route,$owner=null)
 	{
 		if($owner===null)
+		{
 			$owner=$this;
+		}
+		if(YII_DEBUG_ROUTING) Yii::trace("createController [1] (route = " . var_dump_ex_txt($route) . ", owner = " . var_dump_ex_txt($owner) . " )", "framework.web.CWebApplication");
 		if(($route=trim($route,'/'))==='')
+		{
 			$route=$owner->defaultController;
+		}
 		$caseSensitive=$this->getUrlManager()->caseSensitive;
 
 		$route.='/';
@@ -320,51 +334,74 @@ class CWebApplication extends CApplication
 		{
 			$id=substr($route,0,$pos);
 			if(!preg_match('/^\w+$/',$id))
+			{
+				if(YII_DEBUG_ROUTING) Yii::trace("createController [2] --> NULL @ { route = " . var_dump_ex_txt($route) . ", pos = " . var_dump_ex_txt($pos) . ", id = " . var_dump_ex_txt($id) . " }", "framework.web.CWebApplication");
 				return null;
+			}
 			if(!$caseSensitive)
+			{
 				$id=strtolower($id);
+			}
 			$route=(string)substr($route,$pos+1);
 			if(!isset($basePath))  // first segment
 			{
 				if(isset($owner->controllerMap[$id]))
 				{
-					return array(
+					$rv = array(
 						Yii::createComponent($owner->controllerMap[$id],$id,$owner===$this?null:$owner),
 						$this->parseActionParams($route),
 					);
+					if(YII_DEBUG_ROUTING) Yii::trace("createController [3::controllerMap] --> " . var_dump_ex_txt($rv) . " @ { route = " . var_dump_ex_txt($route) . ", pos = " . var_dump_ex_txt($pos) . ", id = " . var_dump_ex_txt($id) . " }", "framework.web.CWebApplication");
+					return $rv;
 				}
 
 				if(($module=$owner->getModule($id))!==null)
-					return $this->createController($route,$module);
+				{
+					$rv = $this->createController($route,$module);
+					if(YII_DEBUG_ROUTING) Yii::trace("createController [4::module] --> " . var_dump_ex_txt($rv) . " @ { route = " . var_dump_ex_txt($route) . ", module = " . var_dump_ex_txt($module) . ", id = " . var_dump_ex_txt($id) . " }", "framework.web.CWebApplication");
+					return $rv;
+				}
 
 				$basePath=$owner->getControllerPath();
 				$controllerID='';
 			}
 			else
+			{
 				$controllerID.='/';
+			}
 			$className=ucfirst($id).'Controller';
 			$classFile=$basePath.DIRECTORY_SEPARATOR.$className.'.php';
 
 			if($owner->controllerNamespace!==null)
+			{
 				$className=$owner->controllerNamespace.'\\'.$className;
+			}
 
+			if(YII_DEBUG_ROUTING) Yii::trace("createController [5::test class/file] { " . var_dump_ex_txt(array('file'=>$classFile, 'name'=>$className, 'controllerID'=>$controllerID, 'id'=>$id)) . " }", "framework.web.CWebApplication");
 			if(is_file($classFile))
 			{
 				if(!class_exists($className,false))
+				{
+					if(YII_DEBUG_ROUTING) Yii::trace("createController [6::loading class file] --> " . var_dump_ex_txt($classFile) . " }", "framework.web.CWebApplication");
 					require($classFile);
+				}
 				if(class_exists($className,false) && is_subclass_of($className,'CController'))
 				{
 					$id[0]=strtolower($id[0]);
-					return array(
+					$rv = array(
 						new $className($controllerID.$id,$owner===$this?null:$owner),
 						$this->parseActionParams($route),
 					);
+					if(YII_DEBUG_ROUTING) Yii::trace("createController [7::class] --> " . var_dump_ex_txt($rv) . " @ { route = " . var_dump_ex_txt($route) . ", owner = " . var_dump_ex_txt($owner) . ", id = " . var_dump_ex_txt($id) . " }", "framework.web.CWebApplication");
+					return $rv;
 				}
+				if(YII_DEBUG_ROUTING) Yii::trace("createController [8::class] --> NULL @ { route = " . var_dump_ex_txt($route) . ", owner = " . var_dump_ex_txt($owner) . ", id = " . var_dump_ex_txt($id) . " }", "framework.web.CWebApplication");
 				return null;
 			}
 			$controllerID.=$id;
 			$basePath.=DIRECTORY_SEPARATOR.$id;
 		}
+		if(YII_DEBUG_ROUTING) Yii::trace("createController [9::SHOULD NEVER GET HERE] --> NULL @ { route = " . var_dump_ex_txt($route) . " }", "framework.web.CWebApplication");
 		return null; // ?should never get here?
 	}
 
@@ -383,7 +420,9 @@ class CWebApplication extends CApplication
 			return $manager->caseSensitive ? $actionID : strtolower($actionID);
 		}
 		else
+		{
 			return $pathInfo;
+		}
 	}
 
 	/**
