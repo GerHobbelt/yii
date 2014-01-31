@@ -365,6 +365,7 @@ class CWebApplication extends CApplication
 			$controllerID.=$id;
 			$basePath.=DIRECTORY_SEPARATOR.$id;
 		}
+		return null; // ?should never get here?
 	}
 
 	/**
