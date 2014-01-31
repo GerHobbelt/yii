@@ -30,10 +30,11 @@ class CHttpException extends CException
 	 * @param integer $status HTTP status code, such as 404, 500, etc.
 	 * @param string $message error message
 	 * @param integer $code error code
+	 * @param Exception $previous the previous exception used for exception chaining
 	 */
-	public function __construct($status,$message=null,$code=0)
+	public function __construct($status,$message=null,$code=0,$previous=null)
 	{
 		$this->statusCode=$status;
-		parent::__construct($message,$code);
+		parent::__construct($message,$code,$previous);
 	}
 }

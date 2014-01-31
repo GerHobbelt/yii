@@ -29,10 +29,11 @@ class CDbException extends CException
 	 * @param string $message PDO error message
 	 * @param integer $code PDO error code
 	 * @param mixed $errorInfo PDO error info
+	 * @param Exception $previous the previous exception used for exception chaining
 	 */
-	public function __construct($message,$code=0,$errorInfo=null)
+	public function __construct($message,$code=0,$errorInfo=null,$previous=null)
 	{
 		$this->errorInfo=$errorInfo;
-		parent::__construct($message,$code);
+		parent::__construct($message,$code,$previous);
 	}
 }
