@@ -605,6 +605,14 @@ class CUrlRule extends CBaseUrlRule
 	 */
 	public $parsingOnly=false;
 	/**
+	 * @var boolean whether to enable strict URL parsing.
+	 * This property is only effective when {@link urlFormat} is 'path'.
+	 * If it is set true by the rule, then an incoming URL must match one of the {@link rules URL rules}.
+	 * Otherwise, it will be treated as an invalid request and trigger a 404 HTTP exception.
+	 * Defaults to {@link CUrlManager::useStrictParsing}.
+	 */
+	public $useStrictParsing=null;
+	/**
 	 * @var string the controller/action pair
 	 */
 	public $route;
@@ -646,7 +654,7 @@ class CUrlRule extends CBaseUrlRule
 	{
 		if(is_array($route))
 		{
-			foreach(array('urlSuffix', 'caseSensitive', 'defaultParams', 'matchValue', 'verb', 'parsingOnly') as $name)
+			foreach(array('urlSuffix', 'caseSensitive', 'defaultParams', 'matchValue', 'verb', 'parsingOnly', 'useStrictParsing') as $name)
 			{
 				if(isset($route[$name]))
 					$this->$name=$route[$name];
@@ -669,7 +677,15 @@ class CUrlRule extends CBaseUrlRule
 		$this->hasHostInfo=!strncasecmp($pattern,'http://',7) || !strncasecmp($pattern,'https://',8);
 
 		if($this->verb!==null)
+		{
 			$this->verb=preg_split('/[\s,]+/',strtoupper($this->verb),-1,PREG_SPLIT_NO_EMPTY);
+		}
+
+		// this will be done in parseUrl() itself:
+		// if ($this->useStrictParsing===null)
+		// {
+		// 	$this->useStrictParsing = $manager->useStrictParsing;
+		// }
 
 		if(preg_match_all('/<(\w+):?(.*?)?>/',$pattern,$matches))
 		{
@@ -811,7 +827,8 @@ class CUrlRule extends CBaseUrlRule
 			$pathInfo=$manager->removeUrlSuffix($rawPathInfo,$this->urlSuffix);
 
 		// URL suffix required, but not found in the requested URL
-		if($manager->useStrictParsing && $pathInfo===$rawPathInfo)
+		$useStrictParsing=$this->useStrictParsing===null ? $manager->useStrictParsing : $this->useStrictParsing;
+		if($useStrictParsing && $pathInfo===$rawPathInfo)
 		{
 			$urlSuffix=$this->urlSuffix===null ? $manager->urlSuffix : $this->urlSuffix;
 			if($urlSuffix!='' && $urlSuffix!=='/')
