@@ -68,6 +68,37 @@ class CBooleanValidator extends CValidator
 	}
 
 	/**
+	 * Coerces the attribute of the object.
+	 * @param CModel $object the object being validated
+	 * @param string $attribute the attribute being validated
+	 */
+	protected function coerceAttribute($object,$attribute)
+	{
+		$value=$object->$attribute;
+		if($this->allowEmpty && $this->isEmpty($value))
+			return false;
+		if($value===$this->trueValue || $value===$this->falseValue)
+		{
+			return false;
+		}
+		if($value==$this->trueValue)
+		{
+			$value=$this->trueValue;
+		}
+		elseif($value==$this->falseValue)
+		{
+			$value=$this->falseValue;
+		}
+		else
+		{
+			// cannot coerce!
+			return 0;			// signal 'no coercion' AND 'cannot coerce'
+		}
+		$object->$attribute=$value;
+		return true;            // signal 'coercion was necessary and has been performed'
+	}
+
+	/**
 	 * Returns the JavaScript needed for performing client-side validation.
 	 * @param CModel $object the data object being validated
 	 * @param string $attribute the name of the attribute to be validated.

@@ -101,6 +101,53 @@ class CTypeValidator extends CValidator
 	}
 
 	/**
+	 * Coerces the attribute of the object.
+	 * @param CModel $object the object being validated
+	 * @param string $attribute the attribute being validated
+	 */
+	protected function coerceAttribute($object,$attribute)
+	{
+		$value=$object->$attribute;
+		if($this->allowEmpty && $this->isEmpty($value))
+			return false;
+
+		$type=$this->type==='float' ? 'double' : $this->type;
+		if($type===gettype($value))
+			return false;
+		switch ($type)
+		{
+		case 'boolean':
+			$value = !!$value;
+			break;
+
+		case 'integer':
+			$value = intval($value);
+			break;
+
+		case 'double':
+			$value = floatval($value);
+			break;
+
+		case 'date':
+			$value = CDateTimeParser::parse($value,$this->dateFormat,array('month'=>1,'day'=>1,'hour'=>0,'minute'=>0,'second'=>0));
+			break;
+
+		case 'time':
+			$value = CDateTimeParser::parse($value,$this->timeFormat);
+			break;
+
+		case 'datetime':
+			$value = CDateTimeParser::parse($value,$this->datetimeFormat, array('month'=>1,'day'=>1,'hour'=>0,'minute'=>0,'second'=>0));
+
+		default:
+			// cannot coerce!
+			return 0;			// signal 'no coercion' AND 'cannot coerce'
+		}
+		$object->$attribute=$value;
+		return true;            // signal 'coercion was necessary and has been performed'
+	}
+
+	/**
 	 * Validates a static value.
 	 * Note that this method does not respect {@link allowEmpty} property.
 	 * This method is provided so that you can call it directly without going through the model validation rule mechanism.

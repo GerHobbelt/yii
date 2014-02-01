@@ -128,6 +128,23 @@ abstract class CValidator extends CComponent
 	 */
 	abstract protected function validateAttribute($object,$attribute);
 
+	/**
+	 * Coerces the attribute of the object.
+	 * @param CModel $object the object being validated
+	 * @param string $attribute the attribute being validated
+	 * @return mixed `false` when the attribute did not need coercion, 
+	 *         `0` (numeric zero) when the attribute *cannot* be coerced, 
+	 *         `true` when the attribute has been successfully coerced.
+	 */
+	protected function coerceAttribute($object,$attribute)
+	{
+		// The default coercion is nothing: no coercion at all.
+		//
+		// This means that only specific validators need to override the coerceAttribute() method:
+		// numerical, boolean, date, ...
+		return false;
+	}
+
 
 	/**
 	 * Creates a validator object.
@@ -211,6 +228,25 @@ abstract class CValidator extends CComponent
 		{
 			if(!$this->skipOnError || !$object->hasErrors($attribute))
 				$this->validateAttribute($object,$attribute);
+		}
+	}
+
+	/**
+	 * Coerces the attributes of the specified object.
+	 * @param CModel $object the data object being validated
+	 * @param array $attributes the list of attributes to be coerced. Defaults to null,
+	 * meaning every attribute listed in {@link attributes} will be coerced.
+	 */
+	public function coerce($object,$attributes=null)
+	{
+		if(is_array($attributes))
+			$attributes=array_intersect($this->attributes,$attributes);
+		else
+			$attributes=$this->attributes;
+		foreach($attributes as $attribute)
+		{
+			if(/*!$this->skipOnError || */ !$object->hasErrors($attribute))
+				$this->coerceAttribute($object,$attribute);
 		}
 	}
 

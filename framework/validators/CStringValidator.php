@@ -110,6 +110,25 @@ class CStringValidator extends CValidator
 	}
 
 	/**
+	 * Coerces the attribute of the object.
+	 * @param CModel $object the object being validated
+	 * @param string $attribute the attribute being validated
+	 */
+	protected function coerceAttribute($object,$attribute)
+	{
+		$value=$object->$attribute;
+		if($this->allowEmpty && $this->isEmpty($value))
+			return false;
+
+		if(is_array($value))
+		{
+			$value=join('', $value);
+		}
+		$object->$attribute=(string)$value;
+		return true;            // signal 'coercion was necessary and has been performed'
+	}
+
+	/**
 	 * Returns the JavaScript needed for performing client-side validation.
 	 * @param CModel $object the data object being validated
 	 * @param string $attribute the name of the attribute to be validated.

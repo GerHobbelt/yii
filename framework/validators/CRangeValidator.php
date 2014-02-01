@@ -77,6 +77,42 @@ class CRangeValidator extends CValidator
 	}
 
 	/**
+	 * Coerces the attribute of the object.
+	 * @param CModel $object the object being validated
+	 * @param string $attribute the attribute being validated
+	 */
+	protected function coerceAttribute($object,$attribute)
+	{
+		$value=$object->$attribute;
+		if($this->allowEmpty && $this->isEmpty($value))
+			return false;
+
+		if($this->not)
+		{
+			// cop out: inverted ranges do not deserve coercion
+			return false;
+		}
+
+		$result = false;
+		foreach($this->range as $r)
+		{
+			$result=(strcmp($r,$value)===0);
+			if($result)
+			{
+				$value=$r; 
+				break;
+			}
+		}
+		if(!$result)
+		{
+			// cannot coerce!
+			return 0;			// signal 'no coercion' AND 'cannot coerce'
+		}
+		$object->$attribute=$value;
+		return true;            // signal 'coercion was necessary and has been performed'
+	}
+
+	/**
 	 * Returns the JavaScript needed for performing client-side validation.
 	 * @param CModel $object the data object being validated
 	 * @param string $attribute the name of the attribute to be validated.
