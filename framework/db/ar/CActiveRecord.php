@@ -444,7 +444,7 @@ abstract class CActiveRecord extends CModel
 	/**
 	 * Returns the primary key of the associated database table.
 	 * This method is meant to be overridden in case when the table is not defined with a primary key
-	 * (for some legency database). If the table is already defined with a primary key,
+	 * (for some legacy database). If the table is already defined with a primary key,
 	 * you do not need to override this method. The default implementation simply returns null,
 	 * meaning using the primary key defined in the database.
 	 * @return mixed the primary key of the associated database table.
@@ -1083,7 +1083,17 @@ abstract class CActiveRecord extends CModel
 				if($table->sequenceName!==null)
 				{
 					if(is_string($primaryKey) && $this->$primaryKey===null)
+					{
 						$this->$primaryKey=$builder->getLastInsertID($table);
+						// and coerce to type!
+						assert(!empty($table->columns[$primaryKey]));
+						assert($table->columns[$primaryKey]->isPrimaryKey === true);
+						$columnDef = $table->columns[$primaryKey];
+						assert($primaryKey === $columnDef->name);
+						// we coerce it right now, right here,
+						// just as we do for all other non-string-typed columns:
+						$this->{$primaryKey} = $columnDef->typecast($this->{$primaryKey});
+					}
 					elseif(is_array($primaryKey))
 					{
 						foreach($primaryKey as $pk)
@@ -1091,6 +1101,15 @@ abstract class CActiveRecord extends CModel
 							if($this->$pk===null)
 							{
 								$this->$pk=$builder->getLastInsertID($table);
+								// and coerce to type!
+								assert(!empty($table->columns[$pk]));
+								assert($table->columns[$pk]->isPrimaryKey === true);
+								$columnDef = $table->columns[$pk];
+								assert($pk === $columnDef->name);
+								// we coerce it right now, right here,
+								// just as we do for all other non-string-typed columns:
+								$this->{$pk} = $columnDef->typecast($this->{$pk});
+								// in a compound primary key, all but the {$pk} columns are assumed to have been set already before.
 								break;
 							}
 						}
@@ -1854,6 +1873,10 @@ abstract class CActiveRecord extends CModel
 		{
 			$record=$this->instantiate($attributes);
 			$record->setScenario('update');
+			// records obtained through find() et al all do exist, so should *never* be marked as being 'new'!
+			//assert($record->getIsNewRecord() === false);                    <-- assert will fire...
+			// reset the 'new record' flag because default instantiation is done based on the ' insert' scenario (see constructor)!
+			$record->setIsNewRecord(false);
 			$record->init();
 			$md=$record->getMetaData();
 			foreach($attributes as $name=>$value)
