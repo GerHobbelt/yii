@@ -97,6 +97,10 @@ abstract class CApplication extends CModule
 	 * the language that the messages and view files are in. Defaults to 'en_us' (US English).
 	 */
 	public $sourceLanguage='en_us';
+	/**
+	 * @var string the class used to get locale data. Defaults to 'CLocale'.
+	 */
+	public $localeClass='CLocale';
 
 	private $_id;
 	private $_basePath;
@@ -413,11 +417,11 @@ abstract class CApplication extends CModule
 	/**
 	 * Returns the locale instance.
 	 * @param string $localeID the locale ID (e.g. en_US). If null, the {@link getLanguage application language ID} will be used.
-	 * @return CLocale the locale instance
+	 * @return an instance of CLocale
 	 */
 	public function getLocale($localeID=null)
 	{
-		return CLocale::getInstance($localeID===null?$this->getLanguage():$localeID);
+		return call_user_func_array(array($this->localeClass, 'getInstance'),array($localeID===null?$this->getLanguage():$localeID));
 	}
 
 	/**
@@ -427,7 +431,10 @@ abstract class CApplication extends CModule
 	 */
 	public function getLocaleDataPath()
 	{
-		return CLocale::$dataPath===null ? Yii::getPathOfAlias('system.i18n.data') : CLocale::$dataPath;
+		$vars=get_class_vars($this->localeClass);
+		if(empty($vars['dataPath']))
+			return Yii::getPathOfAlias('system.i18n.data');
+		return $vars['dataPath'];
 	}
 
 	/**
@@ -437,7 +444,8 @@ abstract class CApplication extends CModule
 	 */
 	public function setLocaleDataPath($value)
 	{
-		CLocale::$dataPath=$value;
+		$property=new ReflectionProperty($this->localeClass,'dataPath');
+		$property->setValue($value);
 	}
 
 	/**

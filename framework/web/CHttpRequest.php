@@ -657,6 +657,10 @@ class CHttpRequest extends CApplicationComponent
 		{
 			return strtoupper($_POST['_method']);
 		}
+                elseif(isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']))
+		{
+                	return strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
+		}
 
 		return strtoupper(isset($_SERVER['REQUEST_METHOD'])?$_SERVER['REQUEST_METHOD']:'GET');
 	}
