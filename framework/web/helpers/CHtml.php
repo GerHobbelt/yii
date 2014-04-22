@@ -367,7 +367,7 @@ class CHtml
 		if($customMethod!==false)
 			$hiddens[]=self::hiddenField('_method',$customMethod);
 		if($hiddens!==array())
-			$form.="\n".self::tag('div',array('style'=>'display:none'),implode("\n",$hiddens));
+			$form.="\n".implode("\n",$hiddens);
 		return $form;
 	}
 
@@ -1123,7 +1123,7 @@ class CHtml
 	public static function checkBoxList($name,$select,$data,$htmlOptions=array())
 	{
 		$template=isset($htmlOptions['template'])?$htmlOptions['template']:'{input} {label}';
-		$separator=isset($htmlOptions['separator'])?$htmlOptions['separator']:"<br/>\n";
+		$separator=isset($htmlOptions['separator'])?$htmlOptions['separator']:self::tag('br');
 		$container=isset($htmlOptions['container'])?$htmlOptions['container']:'span';
 		unset($htmlOptions['template'],$htmlOptions['separator'],$htmlOptions['container']);
 
@@ -1239,7 +1239,7 @@ EOD;
 	public static function radioButtonList($name,$select,$data,$htmlOptions=array())
 	{
 		$template=isset($htmlOptions['template'])?$htmlOptions['template']:'{input} {label}';
-		$separator=isset($htmlOptions['separator'])?$htmlOptions['separator']:"<br/>\n";
+		$separator=isset($htmlOptions['separator'])?$htmlOptions['separator']:self::tag('br');
 		$container=isset($htmlOptions['container'])?$htmlOptions['container']:'span';
 		unset($htmlOptions['template'],$htmlOptions['separator'],$htmlOptions['container']);
 
@@ -2426,7 +2426,9 @@ EOD;
 	protected static function activeInputField($type,$model,$attribute,$htmlOptions)
 	{
 		$htmlOptions['type']=$type;
-		if($type==='text' || $type==='password')
+		if($type==='text'||$type==='password'||$type==='color'||$type==='date'||$type==='datetime'||
+			$type==='datetime-local'||$type==='email'||$type==='month'||$type==='number'||$type==='range'||
+			$type==='search'||$type==='tel'||$type==='time'||$type==='url'||$type==='week')
 		{
 			if(!isset($htmlOptions['maxlength']))
 			{
@@ -2752,9 +2754,9 @@ EOD;
 	public static function renderAttributes($htmlOptions)
 	{
 		static $specialAttributes=array(
-			'async'=>1,
 			'autofocus'=>1,
 			'autoplay'=>1,
+			'async'=>1,
 			'checked'=>1,
 			'controls'=>1,
 			'declare'=>1,
@@ -2796,7 +2798,10 @@ EOD;
 		{
 			if(isset($specialAttributes[$name]))
 			{
-				if($value)
+				if($value===false && $name==='async') {
+					$html .= ' ' . $name.'="false"';
+				}
+				elseif($value)
 				{
 					$html .= ' ' . $name;
 					if(self::$renderSpecialAttributesValue)
