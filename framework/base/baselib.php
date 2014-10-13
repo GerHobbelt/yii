@@ -34,6 +34,7 @@ function get_class_static_vars($object)
 
 
 define('VAR_DUMP_EX_MAX_SUBITEMS_DEFAULT', 0x7FFFFFFF);
+define('VAR_DUMP_EX_MAX_LEVELS', 10);
 
 
 
@@ -145,6 +146,11 @@ function var_dump_ex($value, $level = 0, $sort_before_dump = 0, $show_whitespace
     }
     $classname = get_class($value);
     $rv .= '(' . count($props) . ') ' . $fmt($classname, 'u');
+    if ($level > VAR_DUMP_EX_MAX_LEVELS)
+    {
+      $rv .= "\n" . str_repeat("\t", $level + 1) . ($show_as_HTML ? '<i>(... deeper structure ...)</i>' : '(... deeper structure ...)');
+      break;
+    }
     foreach($props as $key => $val)
     {
       $rv .= "\n" . str_repeat("\t", $level + 1) . $fmt($key, null) . ' => ';
@@ -157,11 +163,24 @@ function var_dump_ex($value, $level = 0, $sort_before_dump = 0, $show_whitespace
       ksort($staticprops);
     }
     $rv .= '+STATIC(' . count($staticprops) . ') ' . $fmt($classname, 'u');
-    foreach($staticprops as $key => $val)
-    {
-      $rv .= "\n" . str_repeat("\t", $level + 1) . 'static ' . $fmt($key, null) . ' => ';
-      $rv .= var_dump_ex($value->{$key}, $level + 1, $sort_before_dump, $show_whitespace, $max_subitems, $show_as_HTML);
+    try
+    { 
+      $srv = '';
+      foreach($staticprops as $key => $val)
+      {
+        $srv .= "\n" . str_repeat("\t", $level + 1) . 'static ' . $fmt($key, null) . ' => ';
+        $srv .= @var_dump_ex($value->{$key}, $level + 1, $sort_before_dump, $show_whitespace, $max_subitems, $show_as_HTML);
+      }
     }
+    catch (Exception $ex) 
+    {
+      // very probably (bleeping) Smarty kicking up a ruckus.
+      foreach($staticprops as $key => $val)
+      {
+        $srv .= "\n" . str_repeat("\t", $level + 1) . 'static ' . $fmt($key, null) . ' ...';
+      }
+    }
+    $rv .= $srv;
     break;
 
   case 'array':
@@ -171,6 +190,11 @@ function var_dump_ex($value, $level = 0, $sort_before_dump = 0, $show_whitespace
       ksort($value);
     }
     $rv .= '(' . count($value) . ')';
+    if ($level > VAR_DUMP_EX_MAX_LEVELS)
+    {
+      $rv .= "\n" . str_repeat("\t", $level + 1) . ($show_as_HTML ? '<i>(... deeper structure ...)</i>' : '(... deeper structure ...)');
+      break;
+    }
     $count = 0;
     foreach($value as $key => $val)
     {
