@@ -51,7 +51,8 @@ class CInlineAction extends CAction
 		}
 		else
 		{
-			return $controller->$methodName();
+			$controller->$methodName();
+			return true;
 		}
 	}
 }
