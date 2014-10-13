@@ -244,9 +244,13 @@ abstract class CModule extends CComponent
 		foreach($mappings as $name=>$alias)
 		{
 			if(($path=Yii::getPathOfAlias($alias))!==false)
+			{
 				Yii::setPathOfAlias($name,$path);
+			}
 			else
+			{
 				Yii::setPathOfAlias($name,$alias);
+			}
 		}
 	}
 
@@ -354,13 +358,17 @@ abstract class CModule extends CComponent
 				$module=array();
 			}
 			if(isset($this->_moduleConfig[$id]) && $merge)
+			{
 				$this->_moduleConfig[$id]=CMap::mergeArray($this->_moduleConfig[$id],$module);
+			}
 			else
 			{
 				if(!isset($module['class']))
 				{
 					if (Yii::getPathOfAlias($id)===false)
+					{
 						Yii::setPathOfAlias($id,$this->getModulePath().DIRECTORY_SEPARATOR.$id);
+					}
 					$module['class']=$id.'.'.ucfirst($id).'Module';
 				}
 				$this->_moduleConfig[$id]=$module;

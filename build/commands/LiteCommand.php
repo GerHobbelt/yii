@@ -70,8 +70,19 @@ EOD;
 		$content="<?php\n".preg_replace('/^(\?>|<\?php)/mu','',$content)."\n?>";
 		$content=$this->stripComments($content);
 		$content=preg_replace('/^require(_once)?.*\s*;\s*$/mu','',$content);
+		
 		$content=preg_replace('/^\s*Yii::trace.*\s*;\s*$/mu','',$content);
-//		$content=preg_replace('/^\s*Yii::(begin|end)Profile.*\s*;\s*$/mu','',$content);
+		// also strip YII_DEBUG_* conditional traces...
+		$content=preg_replace('/^\s*if\s*\(\s*YII_DEBUG[^\)]+\)\s*Yii::trace.*\s*;\s*$/mu','',$content);
+		// ... and the special autoload diagnostics output:
+		$content=preg_replace('/^\s*if\s*\(\s*YII_DEBUG_AUTOLOAD\s*\)\s*echo.*\s*;\s*$/mu','',$content);
+
+        if (0)
+        {
+    		// all profiling start/end invocations are now correctly surrounded by {...} block boundaries
+    		// (no more smart-aleck 'shorthand' coding style there) so those can be safely stripped too:
+    		$content=preg_replace('/^\s*Yii::(begin|end)Profile.*\s*;\s*$/mu','',$content);
+        }		
 		$content=$this->stripEmptyLines($content);
 		$content=substr_replace($content,$comments,5,0);
 		file_put_contents(YII_PATH.DIRECTORY_SEPARATOR.'yiilite.php',$content);

@@ -117,14 +117,18 @@ class CProfileLogRoute extends CWebLogRoute
 					$results[$last[4]]=array($token,$delta,count($stack));
 				}
 				else
+				{
 					throw new CException(Yii::t('yii','CProfileLogRoute found a mismatching code block "{token}". Make sure the calls to Yii::beginProfile() and Yii::endProfile() be properly nested.',
 						array('{token}'=>$token)));
+				}
 			}
 		}
 		// remaining entries should be closed here
 		$now=microtime(true);
 		while(($last=array_pop($stack))!==null)
+		{
 			$results[$last[4]]=array($last[0],$now-$last[3],count($stack));
+		}
 		ksort($results);
 		$this->render('profile-callstack',$results);
 	}
@@ -155,15 +159,23 @@ class CProfileLogRoute extends CWebLogRoute
 				{
 					$delta=$log[3]-$last[3];
 					if(!$this->groupByToken)
+					{
 						$token=$log[2];
+					}
 					if(isset($results[$token]))
+					{
 						$results[$token]=$this->aggregateResult($results[$token],$delta);
+					}
 					else
+					{
 						$results[$token]=array($token,1,$delta,$delta,$delta);
+					}
 				}
 				else
+				{
 					throw new CException(Yii::t('yii','CProfileLogRoute found a mismatching code block "{token}". Make sure the calls to Yii::beginProfile() and Yii::endProfile() be properly nested.',
 						array('{token}'=>$token)));
+				}
 			}
 		}
 
@@ -173,9 +185,13 @@ class CProfileLogRoute extends CWebLogRoute
 			$delta=$now-$last[3];
 			$token=$this->groupByToken ? $last[0] : $last[2];
 			if(isset($results[$token]))
+			{
 				$results[$token]=$this->aggregateResult($results[$token],$delta);
+			}
 			else
+			{
 				$results[$token]=array($token,1,$delta,$delta,$delta);
+			}
 		}
 
 		$entries=array_values($results);

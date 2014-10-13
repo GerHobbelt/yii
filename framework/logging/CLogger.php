@@ -315,8 +315,10 @@ class CLogger extends CComponent
 					$this->_timings[]=array($message,$category,$delta);
 				}
 				else
+				{
 					throw new CException(Yii::t('yii','CProfileLogRoute found a mismatching code block "{token}". Make sure the calls to Yii::beginProfile() and Yii::endProfile() be properly nested.',
 						array('{token}'=>$token)));
+				}
 			}
 		}
 

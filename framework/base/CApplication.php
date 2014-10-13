@@ -433,7 +433,9 @@ abstract class CApplication extends CModule
 	{
 		$vars=get_class_vars($this->localeClass);
 		if(empty($vars['dataPath']))
+		{
 			return Yii::getPathOfAlias('system.i18n.data');
+		}
 		return $vars['dataPath'];
 	}
 

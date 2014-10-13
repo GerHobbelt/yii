@@ -96,7 +96,9 @@ EOD;
 
 		$actionFile=$templatePath.'/action.php';
 		if(!is_file($actionFile))  // fall back to default ones
+		{
 			$actionFile=YII_PATH.'/cli/views/shell/form/action.php';
+		}
 
 		echo "The following form view has been successfully created:\n";
 		echo "\t$viewPath\n\n";
@@ -108,7 +110,9 @@ EOD;
 	public function generateForm($source,$params)
 	{
 		if(!is_file($source))  // fall back to default ones
+		{
 			$source=YII_PATH.'/cli/views/shell/form/'.basename($source);
+		}
 
 		return $this->renderFile($source,$params,true);
 	}
@@ -116,7 +120,9 @@ EOD;
 	public function class2id($className)
 	{
 		if(strrpos($className,'Form')===strlen($className)-4)
+		{
 			$className=substr($className,0,strlen($className)-4);
+		}
 		return trim(strtolower(str_replace('_','-',preg_replace('/(?<![A-Z])[A-Z]/', '-\0', $className))),'-');
 	}
 }

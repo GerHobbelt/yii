@@ -592,8 +592,11 @@ EOD;
 	protected function getTemplate()
 	{
 		if($this->templateFile!==null)
+		{
 			return file_get_contents(Yii::getPathOfAlias($this->templateFile).'.php');
+		}
 		else
+		{
 			return <<<EOD
 <?php
 
@@ -621,5 +624,6 @@ class {ClassName} extends CDbMigration
 	*/
 }
 EOD;
+		}
 	}
 }
