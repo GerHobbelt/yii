@@ -940,5 +940,7 @@ class YiiBase
 	);
 }
 
+require(YII_PATH.'/base/baselib.php');
+
 spl_autoload_register(array('YiiBase','autoload'));
 require(YII_PATH.'/base/interfaces.php');
