@@ -53,6 +53,6 @@ class CInlineAction extends CAction
 		{
 			return $controller->$methodName();
 		}
+		return true;
 	}
-
 }

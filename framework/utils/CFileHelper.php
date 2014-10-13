@@ -248,7 +248,7 @@ class CFileHelper
 		}
 		if(!$isFile || empty($fileTypes))
 			return true;
-		if(($type=pathinfo($file,PATHINFO_EXTENSION))!=='')
+		if(($type=self::getExtension($file))!=='')
 			return in_array($type,$fileTypes);
 		else
 			return false;
@@ -305,13 +305,40 @@ class CFileHelper
 			$extensions=require(Yii::getPathOfAlias('system.utils.mimeTypes').'.php');
 		elseif($magicFile!==null && !isset($customExtensions[$magicFile]))
 			$customExtensions[$magicFile]=require($magicFile);
-		if(($ext=pathinfo($file,PATHINFO_EXTENSION))!=='')
+		if(($ext=self::getExtension($file))!=='')
 		{
 			$ext=strtolower($ext);
 			if($magicFile===null && isset($extensions[$ext]))
 				return $extensions[$ext];
 			elseif($magicFile!==null && isset($customExtensions[$magicFile][$ext]))
 				return $customExtensions[$magicFile][$ext];
+		}
+		return null;
+	}
+
+	/**
+	 * Determines the file extension name based on its MIME type.
+	 * This method will use a local map between MIME type and extension name.
+	 * @param string $file the file name.
+	 * @param string $magicFile the path of the file that contains all available extension information.
+	 * If this is not set, the default 'system.utils.fileExtensions' file will be used.
+	 * This parameter has been available since version 1.1.16.
+	 * @return string extension name. Null is returned if the extension cannot be determined.
+	 */
+	public static function getExtensionByMimeType($file,$magicFile=null)
+	{
+		static $mimeTypes,$customMimeTypes=array();
+		if($magicFile===null && $mimeTypes===null)
+			$mimeTypes=require(Yii::getPathOfAlias('system.utils.fileExtensions').'.php');
+		elseif($magicFile!==null && !isset($customMimeTypes[$magicFile]))
+			$customMimeTypes[$magicFile]=require($magicFile);
+		if(($mime=self::getMimeType($file))!==null)
+		{
+			$mime=strtolower($mime);
+			if($magicFile===null && isset($mimeTypes[$mime]))
+				return $mimeTypes[$mime];
+			elseif($magicFile!==null && isset($customMimeTypes[$magicFile][$mime]))
+				return $customMimeTypes[$magicFile][$mime];
 		}
 		return null;
 	}

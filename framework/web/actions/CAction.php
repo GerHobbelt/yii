@@ -73,8 +73,9 @@ abstract class CAction extends CComponent implements IAction
 		if(YII_DEBUG_ROUTING) Yii::trace("runWithParams(params = " . var_dump_ex_txt($params) . ") { methodName = run, method = " . var_dump_ex_txt($method) . " }", "framework.web.actions.CAction");
 		if($method->getNumberOfParameters()>0)
 			return $this->runWithParamsInternal($this, $method, $params);
-		else
-			return $this->run();
+
+		$this->run();
+		return true;
 	}
 
 	/**
